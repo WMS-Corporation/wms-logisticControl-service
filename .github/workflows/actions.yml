@@ -40,12 +40,19 @@ jobs:
       - name: Run Tests
         run: npm test
         env:
-          DB_NAME_TEST: "WMS_TEST"
           DB_NAME: "WMS"
+          DB_NAME_TEST_MIDDLEWARE: "WMS_TEST_MIDDLEWARE"
+          DB_NAME_TEST_REPOSITORY: "WMS_TEST_REPOSITORY"
+          DB_NAME_TEST_SERVICES: "WMS_TEST_SERVICES"
           DB_CONN_STRING: "mongodb://127.0.0.1:27017"
-          COLLECTION: "Product"
+          STORAGE_COLLECTION: "Storage"
+          ZONE_COLLECTION: "Zone"
+          CORRIDOR_COLLECTION: "Corridor"
+          SHELF_COLLECTION: "Shelf"
+          USER_COLLECTION: "User"
+          COUNTER_COLLECTION: "Counter"
           JWT_SECRET: "secret_key"
-          PORT: 3002
+          PORT: "4005"
 
       - name: Run EsLint quality check
         run: npm run eslint
@@ -70,12 +77,19 @@ jobs:
       - name: Test and coverage
         run: npm run coverage
         env:
-          DB_NAME_TEST: "WMS_TEST"
           DB_NAME: "WMS"
+          DB_NAME_TEST_MIDDLEWARE: "WMS_TEST_MIDDLEWARE"
+          DB_NAME_TEST_REPOSITORY: "WMS_TEST_REPOSITORY"
+          DB_NAME_TEST_SERVICES: "WMS_TEST_SERVICES"
           DB_CONN_STRING: "mongodb://127.0.0.1:27017"
-          COLLECTION: "Product"
+          STORAGE_COLLECTION: "Storage"
+          ZONE_COLLECTION: "Zone"
+          CORRIDOR_COLLECTION: "Corridor"
+          SHELF_COLLECTION: "Shelf"
+          USER_COLLECTION: "User"
+          COUNTER_COLLECTION: "Counter"
           JWT_SECRET: "secret_key"
-          PORT: 3002
+          PORT: "4005"
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
