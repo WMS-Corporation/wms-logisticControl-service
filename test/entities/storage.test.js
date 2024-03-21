@@ -2,7 +2,7 @@
 const path = require("path");
 const fs = require("fs");
 const {createStorageFromData} = require("../../src/factories/storageFactory");
-describe('Order testing', () => {
+describe('Storage testing', () => {
     let storage;
 
     beforeAll(() => {
@@ -11,11 +11,23 @@ describe('Order testing', () => {
         storage = createStorageFromData(storageData)
     });
 
-    it('should return the correct codStorage', () => {
+    it('should return the correct code of storage', () => {
         expect(storage.codStorage).toBe("001549");
     });
 
     it('should return the number of zones', () => {
         expect(storage.zoneList.length).toBe(3);
     });
+
+    it('it should set a new code of storage', () => {
+        let newCode = "000013"
+        storage.codStorage = newCode
+        expect(storage.codStorage).toBe(newCode)
+    })
+
+    it('it should set a new zones of storage', () => {
+        let newZoneList = ["003204", "001644", "009067"]
+        storage.zoneList = newZoneList
+        expect(storage.zoneList).toBe(newZoneList)
+    })
 });
