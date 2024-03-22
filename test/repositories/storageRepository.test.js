@@ -2,7 +2,7 @@ const {Storage} = require("../../src/entities/storage")
 const path = require("path")
 const fs = require("fs")
 const {connectDB, collections, closeDB} = require("../../src/config/dbConnection");
-const {createStorage, getStorages, findStorageByCode} = require("../../src/repositories/storageRepository");
+const {createStorage, getStorages, findStorageByCode, updateStorageData} = require("../../src/repositories/storageRepository");
 
 describe('storageRepository testing', () => {
     beforeAll(async () => {
@@ -43,5 +43,23 @@ describe('storageRepository testing', () => {
 
         expect(storage).toBeNull()
     });
+
+    it('should return an updated storage with new list of zone', async() => {
+        const newZoneCodeList = ["000123", "123098"]
+        const filter = { _codStorage: "001549" }
+        const update = { $set: { _zoneCodeList: newZoneCodeList } }
+
+        const updatedStorage = await updateStorageData(filter, update)
+        expect(updatedStorage._zoneCodeList).toEqual(newZoneCodeList)
+    })
+
+    it('should return null if the filter is not correct', async() => {
+        const newZoneCodeList = ["000123", "123098"]
+        const filter = { _codStorage: "" }
+        const update = { $set: { _zoneCodeList: newZoneCodeList } }
+
+        const updatedStorage = await updateStorageData(filter, update)
+        expect(updatedStorage).toBeNull()
+    })
 
 });

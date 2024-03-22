@@ -2,7 +2,7 @@ const dotenv = require('dotenv')
 const path = require("path")
 const fs = require("fs")
 const {connectDB, collections, closeDB} = require("../../src/config/dbConnection");
-const {generateStorage, getAll, getStorageByCode} = require("../../src/services/storageService");
+const {generateStorage, getAll, getStorageByCode, updateStorageByCode} = require("../../src/services/storageService");
 
 dotenv.config()
 const mockResponse = () => {
@@ -96,4 +96,48 @@ describe('Storage services testing', () => {
         expect(res.json).toHaveBeenCalledWith({message: "Invalid storage data"})
     })
 
+    it('it should return 200 and the storage updated with a new data', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codStorage: "001549"
+            },
+            body:{
+                _name: "storage 1"
+            }
+        };
+
+        await updateStorageByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if updating storage data without correct storage code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codStorage: "000877"
+            }, body:{
+                _name: "storage 1"
+            }
+        };
+
+        await updateStorageByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Storage not found"})
+    })
+
+    it('it should return 401 if updating storage data without specified the storage code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codStorage: ""
+            }, body:{
+                _name: "storage 1"
+            }
+        };
+        await updateStorageByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid storage data"})
+    })
 });

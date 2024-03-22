@@ -51,9 +51,25 @@ const generateUniqueStorageCode = asyncHandler (async () => {
     return nextCode.count.toString().padStart(6, '0')
 })
 
+/**
+ * Updates storage data based on a filter.
+ *
+ * This function updates storage data based on the provided filter criteria and the update object.
+ *
+ * @param {Object} filter - The filter criteria to find the storage(s) to update.
+ * @param {Object} update - The update object containing the fields to update and their new values.
+ * @returns {Object|null} The updated storage data if the storage is found, otherwise null.
+ */
+const updateStorageData = asyncHandler(async(filter, update) => {
+    const options = { returnOriginal: false}
+    await collections?.storage?.findOneAndUpdate(filter, update, options)
+    return await collections?.storage?.findOne(filter)
+})
+
 module.exports = {
     createStorage,
     generateUniqueStorageCode,
     getStorages,
-    findStorageByCode
+    findStorageByCode,
+    updateStorageData
 }
