@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const {createStorageFromData} = require("../factories/storageFactory");
-const {generateUniqueStorageCode, createStorage, getStorages, findStorageByCode, updateStorageData, deleteStorage} = require("../repositories/storageRepository");
+const {createStorage, getStorages, findStorageByCode, updateStorageData, deleteStorage, generateUniqueCode} = require("../repositories/storageRepository");
 
 /**
  * Generate a new storage.
@@ -20,10 +20,10 @@ const generateStorage = asyncHandler(async(req, res) => {
         return res.status(401).json({ message: 'Invalid storage data' })
     }
 
-    storage.codStorage = await generateUniqueStorageCode()
+    storage.codStorage = await generateUniqueCode()
     const resultInsert = await createStorage(storage)
     if(resultInsert){
-        res.status(200).json({ message: 'Storage generation successful', order: storage})
+        res.status(200).json({ message: 'Storage generation successful', storage: storage})
     }else{
         return res.status(401).json({ message: 'Invalid storage data' })
     }

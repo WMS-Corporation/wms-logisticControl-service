@@ -38,14 +38,14 @@ const findStorageByCode = asyncHandler(async (codStorage) => {
 });
 
 /**
- * Generates a unique storage code.
+ * Generates a unique code.
  *
- * This function generates a unique storage code by retrieving the next available code from the counter collection,
+ * This function generates a unique code by retrieving the next available code from the counter collection,
  * incrementing the count, and returning the next code as a string padded with zeros to ensure a fixed length of 6 characters.
  *
- * @returns {string} The next unique storage code.
+ * @returns {string} The next unique code.
  */
-const generateUniqueStorageCode = asyncHandler (async () => {
+const generateUniqueCode = asyncHandler (async () => {
     const nextCode = await collections?.counter?.findOne()
     await collections.counter.updateOne({}, { $inc: {count: 1}})
     return nextCode.count.toString().padStart(6, '0')
@@ -80,7 +80,7 @@ const deleteStorage = asyncHandler(async (codStorage) => {
 
 module.exports = {
     createStorage,
-    generateUniqueStorageCode,
+    generateUniqueCode,
     getStorages,
     findStorageByCode,
     updateStorageData,
