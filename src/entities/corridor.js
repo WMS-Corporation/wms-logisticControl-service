@@ -1,7 +1,7 @@
 class Corridor{
-    constructor(name, shelfList, codCorridor) {
+    constructor(name, shelfCodeList, codCorridor) {
         this._name = name;
-        this._shelfList = shelfList;
+        this._shelfCodeList = shelfCodeList;
         this._codCorridor = codCorridor;
 
     }
@@ -14,12 +14,12 @@ class Corridor{
         this._name = value;
     }
 
-    get shelfList() {
-        return this._shelfList;
+    get shelfCodeList() {
+        return this._shelfCodeList;
     }
 
-    set shelfList(value) {
-        this._shelfList = value;
+    set shelfCodeList(value) {
+        this._shelfCodeList = value;
     }
 
     get codCorridor() {

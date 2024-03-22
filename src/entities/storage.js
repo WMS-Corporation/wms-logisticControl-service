@@ -1,15 +1,15 @@
 class Storage{
-    constructor(zoneList, codStorage) {
+    constructor(zoneCodeList, codStorage) {
         this._codStorage = codStorage
-        this._zoneList = zoneList
+        this._zoneCodeList = zoneCodeList
     }
 
-    get zoneList() {
-        return this._zoneList;
+    get zoneCodeList() {
+        return this._zoneCodeList;
     }
 
-    set zoneList(value) {
-        this._zoneList = value;
+    set zoneCodeList(value) {
+        this._zoneCodeList = value;
     }
 
     get codStorage() {

@@ -20,7 +20,7 @@ describe('Corridor testing', () => {
     });
 
     it('should return the number of shelfs', () => {
-        expect(corridor.shelfList.length).toBe(1);
+        expect(corridor.shelfCodeList.length).toBe(1);
     });
 
     it('it should set a new name of corridor', () => {
@@ -36,8 +36,8 @@ describe('Corridor testing', () => {
     })
 
     it('it should set a new shelfList of corridor', () => {
-        let newShelfList = ["001334", "000664", "988067"]
-        corridor.shelfList = newShelfList
-        expect(corridor.shelfList).toBe(newShelfList)
+        let newShelfCodeList = ["001334", "000664", "988067"]
+        corridor.shelfCodeList = newShelfCodeList
+        expect(corridor.shelfCodeList).toBe(newShelfCodeList)
     })
 });

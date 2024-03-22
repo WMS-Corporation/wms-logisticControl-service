@@ -16,7 +16,7 @@ describe('Storage testing', () => {
     });
 
     it('should return the number of zones', () => {
-        expect(storage.zoneList.length).toBe(3);
+        expect(storage.zoneCodeList.length).toBe(3);
     });
 
     it('it should set a new code of storage', () => {
@@ -26,8 +26,8 @@ describe('Storage testing', () => {
     })
 
     it('it should set a new zones of storage', () => {
-        let newZoneList = ["003204", "001644", "009067"]
-        storage.zoneList = newZoneList
-        expect(storage.zoneList).toBe(newZoneList)
+        let newZoneCodeList = ["003204", "001644", "009067"]
+        storage.zoneCodeList = newZoneCodeList
+        expect(storage.zoneCodeList).toBe(newZoneCodeList)
     })
 });

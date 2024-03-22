@@ -20,7 +20,7 @@ describe('Shelf testing', () => {
     });
 
     it('should return the number of products', () => {
-        expect(shelf.productList.length).toBe(3);
+        expect(shelf.productCodeList.length).toBe(3);
     });
 
     it('it should set a new name of shelf', () => {
@@ -36,8 +36,8 @@ describe('Shelf testing', () => {
     })
 
     it('it should set a new productList of shelf', () => {
-        let newProductList = ["001234", "000564", "987067"]
-        shelf.productList = newProductList
-        expect(shelf.productList).toBe(newProductList)
+        let newProductCodeList = ["001234", "000564", "987067"]
+        shelf.productCodeList = newProductCodeList
+        expect(shelf.productCodeList).toBe(newProductCodeList)
     })
 });

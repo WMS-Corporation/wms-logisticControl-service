@@ -1,9 +1,9 @@
 class Zone{
-    constructor(temperature, coolingSystemStatus, humidityLevel, corridorList, codZone) {
+    constructor(temperature, coolingSystemStatus, humidityLevel, corridorCodeList, codZone) {
         this._temperature = temperature;
         this._coolingSystemStatus = coolingSystemStatus;
         this._humidityLevel = humidityLevel;
-        this._corridorList = corridorList;
+        this._corridorCodeList = corridorCodeList;
         this._codZone = codZone;
     }
 
@@ -31,12 +31,12 @@ class Zone{
         this._humidityLevel = value;
     }
 
-    get corridorList() {
-        return this._corridorList;
+    get corridorCodeList() {
+        return this._corridorCodeList;
     }
 
-    set corridorList(value) {
-        this._corridorList = value;
+    set corridorCodeList(value) {
+        this._corridorCodeList = value;
     }
 
     get codZone() {

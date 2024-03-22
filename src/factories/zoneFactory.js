@@ -8,7 +8,7 @@ const {Zone} = require ('../entities/zone')
  * @returns {Zone} The newly created zone object.
  */
 function createZoneFromData(zoneData) {
-    return new Zone(zoneData._temperature, zoneData._coolingSystemStatus, zoneData._humidityLevel, zoneData._corridorList, zoneData._codZone);
+    return new Zone(zoneData._temperature, zoneData._coolingSystemStatus, zoneData._humidityLevel, zoneData._corridorCodeList, zoneData._codZone);
 }
 
 module.exports = {createZoneFromData}

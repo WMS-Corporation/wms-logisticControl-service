@@ -8,7 +8,7 @@ const {Storage} = require ('../entities/storage')
  * @returns {Storage} The newly created Storage object.
  */
 function createStorageFromData(storageData) {
-    return new Storage(storageData._zoneList, storageData._codStorage);
+    return new Storage(storageData._zoneCodeList, storageData._codStorage);
 }
 
 module.exports = {createStorageFromData}

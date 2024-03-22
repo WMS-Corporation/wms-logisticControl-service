@@ -28,7 +28,7 @@ describe('Corridor testing', () => {
     });
 
     it('should return the number of corridors', () => {
-        expect(zone.corridorList.length).toBe(1);
+        expect(zone.corridorCodeList.length).toBe(1);
     });
 
     it('it should set a new temperature of zone', () => {
@@ -56,8 +56,8 @@ describe('Corridor testing', () => {
     })
 
     it('it should set a new corridorList of zone', () => {
-        let newCorridorList = ["001234", "001664", "988167"]
-        zone.corridorList = newCorridorList
-        expect(zone.corridorList).toBe(newCorridorList)
+        let newCorridorCodeList = ["001234", "001664", "988167"]
+        zone.corridorCodeList = newCorridorCodeList
+        expect(zone.corridorCodeList).toBe(newCorridorCodeList)
     })
 });

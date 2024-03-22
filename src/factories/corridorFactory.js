@@ -8,7 +8,7 @@ const {Corridor} = require ('../entities/corridor')
  * @returns {Corridor} The newly created corridor object.
  */
 function createCorridorFromData(corridorData) {
-    return new Corridor(corridorData._name, corridorData._shelfList, corridorData._codCorridor);
+    return new Corridor(corridorData._name, corridorData._shelfCodeList, corridorData._codCorridor);
 }
 
 module.exports = {createCorridorFromData}

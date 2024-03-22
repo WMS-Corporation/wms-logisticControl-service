@@ -8,7 +8,7 @@ const {Shelf} = require ('../entities/shelf')
  * @returns {Shelf} The newly created shelf object.
  */
 function createShelfFromData(shelfData) {
-    return new Shelf(shelfData._name, shelfData._productList, shelfData._codShelf);
+    return new Shelf(shelfData._name, shelfData._productCodeList, shelfData._codShelf);
 }
 
 module.exports = {createShelfFromData}
