@@ -66,10 +66,23 @@ const updateStorageData = asyncHandler(async(filter, update) => {
     return await collections?.storage?.findOne(filter)
 })
 
+/**
+ * Deletes a storage based on storage code.
+ *
+ * This function deletes a storage based on the provided storage code.
+ *
+ * @param {string} codStorage - The storage code of the storage to be deleted.
+ * @returns {Object} The result of the deletion operation.
+ */
+const deleteStorage = asyncHandler(async (codStorage) => {
+    return await collections?.storage?.deleteOne({_codStorage: codStorage})
+})
+
 module.exports = {
     createStorage,
     generateUniqueStorageCode,
     getStorages,
     findStorageByCode,
-    updateStorageData
+    updateStorageData,
+    deleteStorage
 }

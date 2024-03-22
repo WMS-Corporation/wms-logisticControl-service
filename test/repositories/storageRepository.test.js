@@ -2,7 +2,7 @@ const {Storage} = require("../../src/entities/storage")
 const path = require("path")
 const fs = require("fs")
 const {connectDB, collections, closeDB} = require("../../src/config/dbConnection");
-const {createStorage, getStorages, findStorageByCode, updateStorageData} = require("../../src/repositories/storageRepository");
+const {createStorage, getStorages, findStorageByCode, updateStorageData, deleteStorage} = require("../../src/repositories/storageRepository");
 
 describe('storageRepository testing', () => {
     beforeAll(async () => {
@@ -62,4 +62,11 @@ describe('storageRepository testing', () => {
         expect(updatedStorage).toBeNull()
     })
 
+    it('should return null if the storage has been deleted', async() => {
+        const storageCode = '001549'
+        await deleteStorage(storageCode)
+        const deletedStorage = await findStorageByCode(storageCode)
+
+        expect(deletedStorage).toBeNull()
+    })
 });
