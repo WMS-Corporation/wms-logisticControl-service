@@ -1,0 +1,7 @@
+{
+  "_temperature": 23.5,
+  "_coolingSystemStatus": "Active",
+  "_humidityLevel": 50,
+  "_corridorList": ["002023"],
+  "_codZone" : "096523"
+}

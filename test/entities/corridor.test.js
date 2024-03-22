@@ -36,8 +36,8 @@ describe('Corridor testing', () => {
     })
 
     it('it should set a new shelfList of corridor', () => {
-        let newProductList = ["001334", "000664", "988067"]
-        corridor.productList = newProductList
-        expect(corridor.productList).toBe(newProductList)
+        let newShelfList = ["001334", "000664", "988067"]
+        corridor.shelfList = newShelfList
+        expect(corridor.shelfList).toBe(newShelfList)
     })
 });
