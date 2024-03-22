@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const {createStorageFromData} = require("../factories/storageFactory");
-const {generateUniqueStorageCode, createStorage} = require("../repositories/storageRepository");
+const {generateUniqueStorageCode, createStorage, getStorages} = require("../repositories/storageRepository");
 
 /**
  * Generate a new storage.
@@ -29,6 +29,28 @@ const generateStorage = asyncHandler(async(req, res) => {
     }
 })
 
+/**
+ * Retrieves all storages.
+ *
+ * This function handles the retrieval of all storages from the database.
+ * It calls the getStorages function to fetch the storage data.
+ * If the retrieval is successful, it returns the storage data with HTTP status code 200 (OK).
+ * If the retrieval fails (e.g., invalid storage data), it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The HTTP response containing either the storage data or an error message in JSON format.
+ */
+const getAll = asyncHandler(async(req, res) => {
+    const result = await getStorages()
+    if(result){
+        res.status(200).json(result)
+    } else {
+        res.status(401).json({message: 'Invalid storage data'})
+    }
+})
+
 module.exports = {
-    generateStorage
+    generateStorage,
+    getAll
 }

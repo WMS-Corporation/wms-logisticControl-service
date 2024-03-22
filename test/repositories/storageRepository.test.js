@@ -2,7 +2,7 @@ const {Storage} = require("../../src/entities/storage")
 const path = require("path")
 const fs = require("fs")
 const {connectDB, collections, closeDB} = require("../../src/config/dbConnection");
-const {createStorage} = require("../../src/repositories/storageRepository");
+const {createStorage, getStorages} = require("../../src/repositories/storageRepository");
 
 describe('storageRepository testing', () => {
     beforeAll(async () => {
@@ -23,6 +23,12 @@ describe('storageRepository testing', () => {
         let zoneCodeList = [ "00120", "00124"]
         const result = await createStorage(new Storage(zoneCodeList, "000878"))
         expect(result).toBeDefined()
+    })
+
+    it('should return all the storages', async() => {
+        const result = await getStorages()
+        const numDoc = await collections.storage.countDocuments()
+        expect(result.length).toEqual(numDoc)
     })
 
 });

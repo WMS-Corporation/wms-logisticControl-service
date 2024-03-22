@@ -2,7 +2,7 @@ const dotenv = require('dotenv')
 const path = require("path")
 const fs = require("fs")
 const {connectDB, collections, closeDB} = require("../../src/config/dbConnection");
-const {generateStorage} = require("../../src/services/storageService");
+const {generateStorage, getAll} = require("../../src/services/storageService");
 
 dotenv.config()
 const mockResponse = () => {
@@ -59,5 +59,14 @@ describe('Storage services testing', () => {
 
         expect(res.status).toHaveBeenCalledWith(200)
     });
+
+    it('it should return 200 and all storages that are stored', async() => {
+        const res = mockResponse()
+
+        await getAll(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
 
 });

@@ -15,6 +15,17 @@ const createStorage = asyncHandler(async (storage) => {
 });
 
 /**
+ * Retrieves all storages.
+ *
+ * This function handles the retrieval of all storages from the database.
+ *
+ * @returns {Array|null} An array containing storage data if retrieval is successful, otherwise null.
+ */
+const getStorages = asyncHandler(async () => {
+    return await collections?.storage?.find().toArray()
+})
+
+/**
  * Generates a unique storage code.
  *
  * This function generates a unique storage code by retrieving the next available code from the counter collection,
@@ -30,5 +41,6 @@ const generateUniqueStorageCode = asyncHandler (async () => {
 
 module.exports = {
     createStorage,
-    generateUniqueStorageCode
+    generateUniqueStorageCode,
+    getStorages
 }
