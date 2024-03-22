@@ -26,6 +26,18 @@ const getStorages = asyncHandler(async () => {
 })
 
 /**
+ * Finds a storage by code.
+ *
+ * This function queries the database to find a storage based on the provided code.
+ *
+ * @param {string} codStorage - The code of the storage to find.
+ * @returns {Object|null} The storage object if found, or null if not found.
+ */
+const findStorageByCode = asyncHandler(async (codStorage) => {
+    return await collections?.storage?.findOne({ _codStorage: codStorage })
+});
+
+/**
  * Generates a unique storage code.
  *
  * This function generates a unique storage code by retrieving the next available code from the counter collection,
@@ -42,5 +54,6 @@ const generateUniqueStorageCode = asyncHandler (async () => {
 module.exports = {
     createStorage,
     generateUniqueStorageCode,
-    getStorages
+    getStorages,
+    findStorageByCode
 }

@@ -2,7 +2,7 @@ const dotenv = require('dotenv')
 const path = require("path")
 const fs = require("fs")
 const {connectDB, collections, closeDB} = require("../../src/config/dbConnection");
-const {generateStorage, getAll} = require("../../src/services/storageService");
+const {generateStorage, getAll, getStorageByCode} = require("../../src/services/storageService");
 
 dotenv.config()
 const mockResponse = () => {
@@ -67,6 +67,33 @@ describe('Storage services testing', () => {
 
         expect(res.status).toHaveBeenCalledWith(200)
         expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 200 and the storage with the code specified', async () => {
+        const res = mockResponse()
+        req.params = { codStorage: "001549" }
+
+        await getStorageByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if the code is wrong', async () => {
+        const res = mockResponse()
+        req.params = { codStorage: "000877" }
+
+        await getStorageByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Storage not found"})
+    })
+
+    it('it should return 401 if the code is not specified', async () => {
+        const res = mockResponse()
+        req.params = { codStorage: "" }
+
+        await getStorageByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid storage data"})
     })
 
 });
