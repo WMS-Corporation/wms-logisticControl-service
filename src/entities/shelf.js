@@ -4,7 +4,7 @@ class Shelf{
         this._productList = productList;
         this._codShelf = codShelf;
     }
-    
+
     get name() {
         return this._name;
     }
