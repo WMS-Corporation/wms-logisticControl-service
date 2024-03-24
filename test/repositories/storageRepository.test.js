@@ -7,14 +7,17 @@ const {createStorage, getStorages, findStorageByCode, updateStorageData, deleteS
 describe('storageRepository testing', () => {
     beforeAll(async () => {
         await connectDB(process.env.DB_NAME_TEST_REPOSITORY);
-    });
-
-    beforeEach(async() => {
-        await collections.storage.deleteMany()
         const jsonFilePath = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json');
         const storageData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
         await collections.storage.insertOne(storageData[0])
-    })
+    });
+
+    // beforeEach(async() => {
+    //     await collections.storage.deleteMany()
+    //     const jsonFilePath = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json');
+    //     const storageData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
+    //     await collections.storage.insertOne(storageData[0])
+    // })
     afterAll(async () => {
         await closeDB()
     });

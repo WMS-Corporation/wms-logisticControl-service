@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const {createZoneFromData} = require("../factories/zoneFactory");
-const {generateUniqueCode, findStorageByCode, updateStorageData} = require("../repositories/storageRepository");
-const {createZone} = require("../repositories/zoneRepository");
+const {findStorageByCode, generateUniqueCode, updateStorageData} = require("../repositories/storageRepository");
+const {createZone, getZonesByStorageCode} = require("../repositories/zoneRepository");
 
 /**
  * Generate a new zone.
@@ -25,7 +25,6 @@ const generateZone = asyncHandler(async(req, res) => {
     const storageCode = req.params.codStorage
     if(storageCode){
         const storage = await findStorageByCode(storageCode)
-        console.log(storage)
         if(storage){
             zone.codZone = await generateUniqueCode()
             storage._zoneCodeList.push(zone.codZone)
@@ -47,6 +46,34 @@ const generateZone = asyncHandler(async(req, res) => {
 
 })
 
+/**
+ * Retrieves all zones of specific storage.
+ *
+ * This function handles the retrieval of all zone, of specific storage, from the database.
+ * It calls the getZonesByStorageCode function to fetch the zone data.
+ * If the retrieval is successful, it returns the zone data with HTTP status code 200 (OK).
+ * If the retrieval fails (e.g., invalid zone data), it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The HTTP response containing either the zone data or an error message in JSON format.
+ */
+const getAllZones = asyncHandler(async(req, res) => {
+    const storage = await findStorageByCode(req.params.codStorage)
+    if(storage){
+        const result = await getZonesByStorageCode(storage._codStorage)
+        if(result){
+            res.status(200).json(result)
+        } else {
+            res.status(401).json({message: 'Invalid storage data'})
+        }
+    }else{
+        res.status(401).json({message: 'Storage not found'})
+    }
+
+})
+
 module.exports = {
     generateZone,
+    getAllZones
 }

@@ -2,7 +2,7 @@ const dotenv = require('dotenv')
 const path = require("path")
 const fs = require("fs")
 const {connectDB, collections, closeDB} = require("../../src/config/dbConnection");
-const {generateZone} = require("../../src/services/zoneService");
+const {generateZone, getAllZones} = require("../../src/services/zoneService");
 
 dotenv.config()
 const mockResponse = () => {
@@ -106,5 +106,23 @@ describe('Zone services testing', () => {
 
         expect(res.status).toHaveBeenCalledWith(200)
     });
+
+    it('it should return 200 and all zones of storage', async() => {
+        const res = mockResponse()
+        req.params = { codStorage: "001548" }
+        await getAllZones(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if the code of storage does not exists or is not correct', async () => {
+        const res = mockResponse()
+        req.params = { codStorage: "000877" }
+
+        await getAllZones(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Storage not found"})
+    })
 
 });

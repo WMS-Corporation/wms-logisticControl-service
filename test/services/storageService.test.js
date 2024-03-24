@@ -147,10 +147,6 @@ describe('Storage services testing', () => {
                 codStorage: "001549"
             }
         }
-        // await generateStorage(req, res)
-        // let counter = await collections?.counter?.findOne()
-        // let codStorage = ((counter.count) - 1).toString().padStart(6, '0')
-        // req.params = { codStorage: codStorage}
         await deleteStorageByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(200)
         expect(res.json).not.toBeNull()
