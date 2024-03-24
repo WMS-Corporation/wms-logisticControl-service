@@ -25,6 +25,7 @@ const generateZone = asyncHandler(async(req, res) => {
     const storageCode = req.params.codStorage
     if(storageCode){
         const storage = await findStorageByCode(storageCode)
+        console.log(storage)
         if(storage){
             zone.codZone = await generateUniqueCode()
             storage._zoneCodeList.push(zone.codZone)

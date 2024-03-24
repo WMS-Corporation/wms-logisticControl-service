@@ -21,20 +21,21 @@ describe('Zone services testing', () => {
 
     beforeAll(async () => {
         await connectDB(process.env.DB_NAME_TEST_SERVICES);
-        const jsonFilePathStorage = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json');
-        const storageData =  JSON.parse(fs.readFileSync(jsonFilePathStorage, 'utf-8'));
-        await collections.storage.insertOne(storageData)
+        // const jsonFilePathStorage = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json');
+        // const storageData =  JSON.parse(fs.readFileSync(jsonFilePathStorage, 'utf-8'));
+        // await collections.storage.insertOne(storageData)
+        await collections.zones.deleteMany()
+        const jsonFilePathZone = path.resolve(__dirname, '../Resources/MongoDB/WMS.Zone.json');
+        const zoneData = JSON.parse(fs.readFileSync(jsonFilePathZone, 'utf-8'));
+        await collections.zones.insertOne(zoneData)
     });
 
     beforeEach(async() => {
-        await collections.zones.deleteMany()
-        //await collections.storage.deleteMany()
-        //const jsonFilePathStorage = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json');
-        const jsonFilePathZone = path.resolve(__dirname, '../Resources/MongoDB/WMS.Zone.json');
-        const zoneData = JSON.parse(fs.readFileSync(jsonFilePathZone, 'utf-8'));
-        //const storageData =  JSON.parse(fs.readFileSync(jsonFilePathStorage, 'utf-8'));
-        await collections.zones.insertOne(zoneData)
-        //await collections.storage.insertOne(storageData)
+        // await collections.zones.deleteMany()
+        // const jsonFilePathZone = path.resolve(__dirname, '../Resources/MongoDB/WMS.Zone.json');
+        // const zoneData = JSON.parse(fs.readFileSync(jsonFilePathZone, 'utf-8'));
+        // await collections.zones.insertOne(zoneData)
+
         req.body = ""
         req.user = ""
         req.params = ""
