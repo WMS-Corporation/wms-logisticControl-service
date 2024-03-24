@@ -8,7 +8,7 @@ describe('Storage testing', () => {
     beforeAll(() => {
         const jsonFilePath = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json')
         const storageData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'))
-        storage = createStorageFromData(storageData)
+        storage = createStorageFromData(storageData[0])
     });
 
     it('should return the correct code of storage', () => {

@@ -13,7 +13,7 @@ describe('storageRepository testing', () => {
         await collections.storage.deleteMany()
         const jsonFilePath = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json');
         const storageData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
-        await collections.storage.insertOne(storageData)
+        await collections.storage.insertOne(storageData[0])
     })
     afterAll(async () => {
         await closeDB()

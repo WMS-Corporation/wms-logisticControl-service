@@ -21,21 +21,18 @@ describe('Zone services testing', () => {
 
     beforeAll(async () => {
         await connectDB(process.env.DB_NAME_TEST_SERVICES);
-        // const jsonFilePathStorage = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json');
-        // const storageData =  JSON.parse(fs.readFileSync(jsonFilePathStorage, 'utf-8'));
-        // await collections.storage.insertOne(storageData)
-        await collections.zones.deleteMany()
+        const jsonFilePathStorage = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json');
+        const storageData =  JSON.parse(fs.readFileSync(jsonFilePathStorage, 'utf-8'));
+        if(!(await collections.storage.findOne({_codStorage: storageData[1]._codStorage}))){
+            await collections.storage.insertOne(storageData[1])
+        }
+
         const jsonFilePathZone = path.resolve(__dirname, '../Resources/MongoDB/WMS.Zone.json');
         const zoneData = JSON.parse(fs.readFileSync(jsonFilePathZone, 'utf-8'));
         await collections.zones.insertOne(zoneData)
     });
 
     beforeEach(async() => {
-        // await collections.zones.deleteMany()
-        // const jsonFilePathZone = path.resolve(__dirname, '../Resources/MongoDB/WMS.Zone.json');
-        // const zoneData = JSON.parse(fs.readFileSync(jsonFilePathZone, 'utf-8'));
-        // await collections.zones.insertOne(zoneData)
-
         req.body = ""
         req.user = ""
         req.params = ""
@@ -97,7 +94,7 @@ describe('Zone services testing', () => {
 
     it('it should return 200 if the zone generation is successful', async () => {
         const res = mockResponse()
-        req.params = { codStorage: "001549"}
+        req.params = { codStorage: "001548"}
         req.body = {
             _temperature : 23.5,
             _coolingSystemStatus : "Active",

@@ -21,11 +21,9 @@ describe('Storage services testing', () => {
 
     beforeAll(async () => {
         await connectDB(process.env.DB_NAME_TEST_SERVICES);
-        await collections.storage.deleteMany()
         const jsonFilePath = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json');
         const storageData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
-        await collections.storage.insertOne(storageData)
-
+        await collections.storage.insertOne(storageData[0])
     });
 
     beforeEach(async() => {
@@ -104,7 +102,7 @@ describe('Storage services testing', () => {
                 codStorage: "001549"
             },
             body:{
-                _zoneCodeList: [ "00120", "00124" ]
+                _name: "storage 1"
             }
         };
 
@@ -145,14 +143,14 @@ describe('Storage services testing', () => {
     it('it should return 200 and the code of the storage that has been deleted', async () => {
         const res = mockResponse()
         const req = {
-            body:{
-                _zoneCodeList: [ "00021", "00124" ]
+            params: {
+                codStorage: "001549"
             }
         }
-        await generateStorage(req, res)
-        let counter = await collections?.counter?.findOne()
-        let codStorage = ((counter.count) - 1).toString().padStart(6, '0')
-        req.params = { codStorage: codStorage}
+        // await generateStorage(req, res)
+        // let counter = await collections?.counter?.findOne()
+        // let codStorage = ((counter.count) - 1).toString().padStart(6, '0')
+        // req.params = { codStorage: codStorage}
         await deleteStorageByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(200)
         expect(res.json).not.toBeNull()
