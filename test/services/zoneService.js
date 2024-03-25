@@ -17,30 +17,13 @@ const req = {
     params: ""
 }
 
-describe('Zone services testing', () => {
-
-    beforeAll(async () => {
-        await connectDB(process.env.DB_NAME_TEST_SERVICES);
-        const jsonFilePathStorage = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json');
-        const storageData =  JSON.parse(fs.readFileSync(jsonFilePathStorage, 'utf-8'));
-        if(!(await collections.storage.findOne({_codStorage: storageData[1]._codStorage}))){
-            await collections.storage.insertOne(storageData[1])
-        }
-
-        const jsonFilePathZone = path.resolve(__dirname, '../Resources/MongoDB/WMS.Zone.json');
-        const zoneData = JSON.parse(fs.readFileSync(jsonFilePathZone, 'utf-8'));
-        await collections.zones.insertOne(zoneData)
-    });
+const zoneService = () => describe('Zone testing', () => {
 
     beforeEach(async() => {
         req.body = ""
         req.user = ""
         req.params = ""
     })
-
-    afterAll(async () => {
-        await closeDB()
-    });
 
     it('it should return 401 if the data are invalid', async () => {
         const res = mockResponse()
@@ -126,3 +109,5 @@ describe('Zone services testing', () => {
     })
 
 });
+
+module.exports = {zoneService}

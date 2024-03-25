@@ -11,15 +11,15 @@ describe('Corridor testing', () => {
         corridor = createCorridorFromData(corridorData)
     });
 
-    it('should return the correct code of corridor', () => {
+    it('it should return the correct code of corridor', () => {
         expect(corridor.codCorridor).toBe("002023");
     });
 
-    it('should return the correct name', () => {
+    it('it should return the correct name', () => {
         expect(corridor.name).toBe("Corridor 1");
     });
 
-    it('should return the number of shelfs', () => {
+    it('it should return the number of shelfs', () => {
         expect(corridor.shelfCodeList.length).toBe(1);
     });
 

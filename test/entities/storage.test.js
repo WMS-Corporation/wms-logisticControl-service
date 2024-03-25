@@ -11,11 +11,11 @@ describe('Storage testing', () => {
         storage = createStorageFromData(storageData[0])
     });
 
-    it('should return the correct code of storage', () => {
+    it('it should return the correct code of storage', () => {
         expect(storage.codStorage).toBe("001549");
     });
 
-    it('should return the number of zones', () => {
+    it('it should return the number of zones', () => {
         expect(storage.zoneCodeList.length).toBe(3);
     });
 

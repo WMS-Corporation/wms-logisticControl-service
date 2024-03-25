@@ -17,24 +17,13 @@ const req = {
     params: ""
 }
 
-describe('Storage services testing', () => {
-
-    beforeAll(async () => {
-        await connectDB(process.env.DB_NAME_TEST_SERVICES);
-        const jsonFilePath = path.resolve(__dirname, '../Resources/MongoDB/WMS.Storage.json');
-        const storageData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
-        await collections.storage.insertOne(storageData[0])
-    });
+const storageService = () => describe('Storage testing', () => {
 
     beforeEach(async() => {
         req.body = ""
         req.user = ""
         req.params = ""
     })
-
-    afterAll(async () => {
-        await closeDB()
-    });
 
     it('it should return 401 if the data are invalid', async () => {
         const res = mockResponse()
@@ -177,3 +166,5 @@ describe('Storage services testing', () => {
         expect(res.json).toHaveBeenCalledWith({message: "Invalid storage data"})
     })
 });
+
+module.exports = {storageService}

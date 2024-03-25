@@ -11,15 +11,15 @@ describe('Shelf testing', () => {
         shelf = createShelfFromData(shelfData)
     });
 
-    it('should return the correct code of shelf', () => {
+    it('it should return the correct code of shelf', () => {
         expect(shelf.codShelf).toBe("001023");
     });
 
-    it('should return the correct name', () => {
+    it('it should return the correct name', () => {
         expect(shelf.name).toBe("Shelf 1");
     });
 
-    it('should return the number of products', () => {
+    it('it should return the number of products', () => {
         expect(shelf.productCodeList.length).toBe(3);
     });
 

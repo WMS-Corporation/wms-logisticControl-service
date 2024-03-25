@@ -2,7 +2,7 @@
 const path = require("path");
 const fs = require("fs");
 const {createZoneFromData} = require("../../src/factories/zoneFactory");
-describe('Corridor testing', () => {
+describe('Zone testing', () => {
     let zone;
 
     beforeAll(() => {
@@ -11,23 +11,23 @@ describe('Corridor testing', () => {
         zone = createZoneFromData(zoneData)
     });
 
-    it('should return the correct code of zone', () => {
+    it('it should return the correct code of zone', () => {
         expect(zone.codZone).toBe("096523");
     });
 
-    it('should return the correct temperature of zone', () => {
+    it('it should return the correct temperature of zone', () => {
         expect(zone.temperature).toBe(23.5);
     });
 
-    it('should return the correct humidity level of zone', () => {
+    it('it should return the correct humidity level of zone', () => {
         expect(zone.humidityLevel).toBe(50);
     });
 
-    it('should return the correct status of cooling system of the zone', () => {
+    it('it should return the correct status of cooling system of the zone', () => {
         expect(zone.coolingSystemStatus).toBe("Active");
     });
 
-    it('should return the number of corridors', () => {
+    it('it should return the number of corridors', () => {
         expect(zone.corridorCodeList.length).toBe(1);
     });
 
