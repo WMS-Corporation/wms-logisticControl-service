@@ -1,8 +1,7 @@
-const {Corridor} = require("../../src/entities/corridor")
+
 const {describe, it, expect} = require('@jest/globals')
-const {createShelf, getShelfsByCorridorCode} = require("../../src/repositories/shelfRepository");
+const {createShelf, getShelfsByCorridorCode, findShelfByCode} = require("../../src/repositories/shelfRepository");
 const {Shelf} = require("../../src/entities/shelf");
-const {getCorridorsByZoneCode} = require("../../src/repositories/corridorRepository");
 const shelfRepository = () => describe('Shelf testing', () => {
 
     it("it should create a new shelf", async ()  => {
@@ -15,6 +14,19 @@ const shelfRepository = () => describe('Shelf testing', () => {
         const result = await getShelfsByCorridorCode("002024")
         expect(result.length).toEqual(1)
     })
+
+    it('it should find a shelf by code', async () => {
+        const shelf = await findShelfByCode("001023")
+        const productCodeList = ["000234", "000123", "000456"]
+        expect(shelf._productCodeList).toEqual(productCodeList)
+    });
+
+    it('it should return null if shelf is not found', async () => {
+        const codShelf = '0a2123'
+        const shelf = await findShelfByCode(codShelf)
+
+        expect(shelf).toBeNull()
+    });
 });
 
 module.exports = {shelfRepository}

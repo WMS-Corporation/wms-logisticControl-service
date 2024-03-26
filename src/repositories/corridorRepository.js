@@ -27,6 +27,17 @@ const getCorridorsByZoneCode = asyncHandler(async (codZone) => {
 })
 
 /**
+ * Retrieves all corridors.
+ *
+ * This function handles the retrieval of all corridors from the database.
+ *
+ * @returns {Array|null} An array containing corridor data if retrieval is successful, otherwise null.
+ */
+const getCorridors = asyncHandler(async () => {
+    return await collections?.corridors?.find().toArray()
+})
+
+/**
  * Finds a corridor by code.
  *
  * This function queries the database to find a corridor based on the provided code.
@@ -70,5 +81,6 @@ module.exports = {
     getCorridorsByZoneCode,
     findCorridorByCode,
     updateCorridorData,
-    deleteCorridor
+    deleteCorridor,
+    getCorridors
 }

@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const {createShelfFromData} = require("../factories/shelfFactory");
 const {findCorridorByCode, updateCorridorData} = require("../repositories/corridorRepository");
 const {generateUniqueCode} = require("../repositories/storageRepository");
-const {createShelf, getShelfsByCorridorCode} = require("../repositories/shelfRepository");
+const {createShelf, getShelfsByCorridorCode, findShelfByCode} = require("../repositories/shelfRepository");
 
 /**
  * Generate a new shelf.
@@ -74,7 +74,36 @@ const getAllShelfs = asyncHandler(async(req, res) => {
 
 })
 
+/**
+ * Retrieves shelf by code.
+ *
+ * This function handles the retrieval of shelf based on the provided code.
+ * It extracts the shelf code from the request parameters.
+ * If the shelf is provided, it calls the findShelfByCode function to search for the shelf in the database.
+ * If the shelf is found, it returns the shelf data with HTTP status code 200 (OK).
+ * If the shelf is not found, it returns an error message with HTTP status code 401 (Unauthorized).
+ * If the shelf code is invalid or missing, it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The HTTP response containing either the shelf data or an error message in JSON format.
+ */
+const getShelfByCode = asyncHandler(async (req, res) => {
+    const shelfCode = req.params.codShelf
+    if(shelfCode){
+        const shelf = await findShelfByCode(shelfCode)
+        if(shelf){
+            res.status(200).json(shelf)
+        } else{
+            res.status(401).json({message: 'Shelf not found'})
+        }
+    }else{
+        res.status(401).json({message:'Invalid shelf data'})
+    }
+})
+
 module.exports = {
     generateShelf,
-    getAllShelfs
+    getAllShelfs,
+    getShelfByCode
 }

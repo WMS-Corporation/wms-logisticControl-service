@@ -26,7 +26,32 @@ const getShelfsByCorridorCode = asyncHandler(async (codCorridor) => {
     return corridor._shelfCodeList
 })
 
+/**
+ * Retrieves all shelf.
+ *
+ * This function handles the retrieval of all shelf from the database.
+ *
+ * @returns {Array|null} An array containing corridor data if retrieval is successful, otherwise null.
+ */
+const getShelf = asyncHandler(async () => {
+    return await collections?.shelfs?.find().toArray()
+})
+
+/**
+ * Finds a shelf by code.
+ *
+ * This function queries the database to find a shelf based on the provided code.
+ *
+ * @param {string} shelfCode - The code of the shelf to find.
+ * @returns {Object|null} The shelf object if found, or null if not found.
+ */
+const findShelfByCode = asyncHandler(async (shelfCode) => {
+    return await collections?.shelfs?.findOne({ _codShelf: shelfCode })
+});
+
 module.exports = {
     createShelf,
-    getShelfsByCorridorCode
+    getShelfsByCorridorCode,
+    getShelf,
+    findShelfByCode
 }

@@ -1,7 +1,7 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
-const {generateShelf, getAllShelfs} = require("../../src/services/shelfService");
-const {getAllCorridors} = require("../../src/services/corridorService");
+const {generateShelf, getAllShelfs, getShelfByCode} = require("../../src/services/shelfService");
+const {getAllCorridors, getCorridorByCode} = require("../../src/services/corridorService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -96,6 +96,33 @@ const shelfService = () => describe('Shelf testing', () => {
         await getAllShelfs(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Corridor not found"})
+    })
+
+    it('it should return 200 and the shelf with the code specified', async () => {
+        const res = mockResponse()
+        req.params = { codShelf: "001023" }
+
+        await getShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if the code is wrong', async () => {
+        const res = mockResponse()
+        req.params = { codShelf: "asddfve" }
+
+        await getShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Shelf not found"})
+    })
+
+    it('it should return 401 if the code is not specified', async () => {
+        const res = mockResponse()
+        req.params = { codShelf: "" }
+
+        await getShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid shelf data"})
     })
 
 });
