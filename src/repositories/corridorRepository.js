@@ -53,9 +53,22 @@ const updateCorridorData = asyncHandler(async(filter, update) => {
     return await collections?.corridors?.findOne(filter)
 })
 
+/**
+ * Deletes a corridor based on corridor code.
+ *
+ * This function deletes a corridor based on the provided corridor code.
+ *
+ * @param {string} codCorridor - The corridor code of the corridor to be deleted.
+ * @returns {Object} The result of the deletion operation.
+ */
+const deleteCorridor = asyncHandler(async (codCorridor) => {
+    return await collections?.corridors?.deleteOne({_codCorridor: codCorridor})
+})
+
 module.exports = {
     createCorridor,
     getCorridorsByZoneCode,
     findCorridorByCode,
-    updateCorridorData
+    updateCorridorData,
+    deleteCorridor
 }

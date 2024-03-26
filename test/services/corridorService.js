@@ -1,7 +1,7 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
-const {generateCorridor, getAllCorridors, getCorridorByCode, updateCorridorByCode} = require("../../src/services/corridorService");
-const {getAllZones, getZoneByCode, updateZoneByCode} = require("../../src/services/zoneService");
+const {generateCorridor, getAllCorridors, getCorridorByCode, updateCorridorByCode, deleteCorridorByCode} = require("../../src/services/corridorService");
+const {getAllZones, getZoneByCode, updateZoneByCode, deleteZoneByCode} = require("../../src/services/zoneService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -166,6 +166,43 @@ const corridorService = () => describe('Corridor testing', () => {
             }
         };
         await updateCorridorByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid corridor data"})
+    })
+
+    it('it should return 200 and the code of the corridor that has been deleted', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codCorridor: "002023"
+            }
+        }
+        await deleteCorridorByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if deleting corridor without correct corridor code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codCorridor: "0a0978"
+            }
+        };
+
+        await deleteCorridorByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Corridor not found"})
+    })
+
+    it('it should return 401 if deleting zone without specified the zone code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codCorridor: ""
+            }
+        };
+        await deleteCorridorByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid corridor data"})
     })

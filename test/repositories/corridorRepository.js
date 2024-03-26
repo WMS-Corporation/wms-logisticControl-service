@@ -1,7 +1,7 @@
 const {Corridor} = require("../../src/entities/corridor")
 const {describe, it, expect} = require('@jest/globals')
-const {createCorridor, getCorridorsByZoneCode, findCorridorByCode, updateCorridorData} = require("../../src/repositories/corridorRepository");
-const {findZoneByCode, updateZoneData} = require("../../src/repositories/zoneRepository");
+const {createCorridor, getCorridorsByZoneCode, findCorridorByCode, updateCorridorData, deleteCorridor} = require("../../src/repositories/corridorRepository");
+const {findZoneByCode, updateZoneData, deleteZone} = require("../../src/repositories/zoneRepository");
 const corridorRepository = () => describe('Storage testing', () => {
 
     it("it should create a new storage", async ()  => {
@@ -44,6 +44,14 @@ const corridorRepository = () => describe('Storage testing', () => {
 
         const updatedCorridor = await updateCorridorData(filter, update)
         expect(updatedCorridor).toBeNull()
+    })
+
+    it('it should return null if the corridor has been deleted', async() => {
+        const corridorCode = '002023'
+        await deleteCorridor(corridorCode)
+        const deletedCorridor = await findCorridorByCode(corridorCode)
+
+        expect(deletedCorridor).toBeNull()
     })
 
 });

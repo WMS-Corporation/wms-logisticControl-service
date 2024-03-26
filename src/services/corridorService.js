@@ -1,8 +1,8 @@
 const asyncHandler = require("express-async-handler");
 const {createCorridorFromData} = require("../factories/corridorFactory");
-const {findZoneByCode, updateZoneData} = require("../repositories/zoneRepository");
+const {findZoneByCode, updateZoneData, getZones} = require("../repositories/zoneRepository");
 const {generateUniqueCode} = require("../repositories/storageRepository");
-const {createCorridor, getCorridorsByZoneCode, findCorridorByCode, updateCorridorData} = require("../repositories/corridorRepository");
+const {createCorridor, getCorridorsByZoneCode, findCorridorByCode, updateCorridorData, deleteCorridor} = require("../repositories/corridorRepository");
 
 /**
  * Generate a new corridor.
@@ -133,9 +133,50 @@ const updateCorridorByCode = asyncHandler(async (req, res) => {
     }
 })
 
+/**
+ * Deletes corridor by zone corridor.
+ *
+ * This function deletes a corridor based on the provided corridor code.
+ * It extracts the corridor code from the request parameters.
+ * If the corridor code is provided, it retrieves the corridor data using findCorridorByCode function.
+ * If the corridor is found, it deletes the corridor from the database and returns the deleted corridor code with HTTP status code 200 (OK).
+ * If the corridor is not found, it returns an error message with HTTP status code 401 (Unauthorized).
+ * If the corridor code is invalid or missing, it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object containing corridor data.
+ * @param {Object} res - The response object used to send the response.
+ * @returns {Object} The HTTP response containing either the deleted corridor code or an error message in JSON format.
+ */
+const deleteCorridorByCode = asyncHandler(async (req, res) => {
+    const codCorridor = req.params.codCorridor
+    if(codCorridor){
+        const corridor = await findCorridorByCode(codCorridor)
+        if(corridor){
+            const corridorCode = corridor._codCorridor
+            await deleteCorridor(corridorCode)
+            let zones = await getZones();
+            for (const zone of zones){
+                const index = zone._corridorCodeList.indexOf(codCorridor);
+                if (index !== -1) {
+                    zone._corridorCodeList.splice(index, 1);
+                    const filter = { _codZone: zone._codZone }
+                    const update = { $set: {_corridorCodeList: zone._corridorCodeList}}
+                    await updateZoneData(filter, update)
+                }
+            }
+            res.status(200).json(corridorCode)
+        } else{
+            res.status(401).json({message: 'Corridor not found'})
+        }
+    }else{
+        res.status(401).json({message:'Invalid corridor data'})
+    }
+})
+
 module.exports = {
     generateCorridor,
     getAllCorridors,
     getCorridorByCode,
-    updateCorridorByCode
+    updateCorridorByCode,
+    deleteCorridorByCode
 }

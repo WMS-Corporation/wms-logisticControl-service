@@ -15,6 +15,17 @@ const createZone = asyncHandler(async (zone) => {
 });
 
 /**
+ * Retrieves all zones.
+ *
+ * This function handles the retrieval of all zones from the database.
+ *
+ * @returns {Array|null} An array containing zone data if retrieval is successful, otherwise null.
+ */
+const getZones = asyncHandler(async () => {
+    return await collections?.zones?.find().toArray()
+})
+
+/**
  * Retrieves all zones about specific storage.
  *
  * This function handles the retrieval of all zones, about specific storage, from the database.
@@ -70,5 +81,6 @@ module.exports = {
     getZonesByStorageCode,
     findZoneByCode,
     updateZoneData,
-    deleteZone
+    deleteZone,
+    getZones
 }
