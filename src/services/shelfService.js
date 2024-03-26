@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const {createShelfFromData} = require("../factories/shelfFactory");
 const {findCorridorByCode, updateCorridorData} = require("../repositories/corridorRepository");
 const {generateUniqueCode} = require("../repositories/storageRepository");
-const {createShelf, getShelfsByCorridorCode, findShelfByCode} = require("../repositories/shelfRepository");
+const {createShelf, getShelfsByCorridorCode, findShelfByCode, updateShelfData} = require("../repositories/shelfRepository");
 
 /**
  * Generate a new shelf.
@@ -102,8 +102,40 @@ const getShelfByCode = asyncHandler(async (req, res) => {
     }
 })
 
+/**
+ * Updates shelf data by code.
+ *
+ * This function updates the shelf data based on the provided shelf code.
+ * It extracts the shelf code from the request parameters.
+ * If the shelf code is provided, it retrieves the shelf data using findShelfByCode function.
+ * If the shelf is found, it updates the shelf data in the database and returns the updated shelf data with HTTP status code 200 (OK).
+ * If the shelf is not found, it returns an error message with HTTP status code 401 (Unauthorized).
+ * If the shelf code is invalid or missing, it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object containing shelf data.
+ * @param {Object} res - The response object used to send the response.
+ * @returns {Object} The HTTP response containing either the updated shelf data or an error message in JSON format.
+ */
+const updateShelfByCode = asyncHandler(async (req, res) => {
+    const codShelf = req.params.codShelf
+    if(codShelf){
+        const shelf = await findShelfByCode(codShelf)
+        if(shelf){
+            const filter = { _codShelf: codShelf }
+            const update = { $set: req.body}
+            const updatedShelf = await updateShelfData(filter, update)
+            res.status(200).json(updatedShelf)
+        } else{
+            res.status(401).json({message: 'Shelf not found'})
+        }
+    }else{
+        res.status(401).json({message:'Invalid shelf data'})
+    }
+})
+
 module.exports = {
     generateShelf,
     getAllShelfs,
-    getShelfByCode
+    getShelfByCode,
+    updateShelfByCode
 }

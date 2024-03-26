@@ -49,9 +49,25 @@ const findShelfByCode = asyncHandler(async (shelfCode) => {
     return await collections?.shelfs?.findOne({ _codShelf: shelfCode })
 });
 
+/**
+ * Updates shelf data based on a filter.
+ *
+ * This function updates shelf data based on the provided filter criteria and the update object.
+ *
+ * @param {Object} filter - The filter criteria to find the shelf(s) to update.
+ * @param {Object} update - The update object containing the fields to update and their new values.
+ * @returns {Object|null} The updated shelf data if the corridor is found, otherwise null.
+ */
+const updateShelfData = asyncHandler(async(filter, update) => {
+    const options = { returnOriginal: false}
+    await collections?.shelfs?.findOneAndUpdate(filter, update, options)
+    return await collections?.shelfs?.findOne(filter)
+})
+
 module.exports = {
     createShelf,
     getShelfsByCorridorCode,
     getShelf,
-    findShelfByCode
+    findShelfByCode,
+    updateShelfData
 }

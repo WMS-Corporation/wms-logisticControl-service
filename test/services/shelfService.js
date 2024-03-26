@@ -1,7 +1,7 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
-const {generateShelf, getAllShelfs, getShelfByCode} = require("../../src/services/shelfService");
-const {getAllCorridors, getCorridorByCode} = require("../../src/services/corridorService");
+const {generateShelf, getAllShelfs, getShelfByCode, updateShelfByCode} = require("../../src/services/shelfService");
+const {getAllCorridors, getCorridorByCode, updateCorridorByCode} = require("../../src/services/corridorService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -121,6 +121,53 @@ const shelfService = () => describe('Shelf testing', () => {
         req.params = { codShelf: "" }
 
         await getShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid shelf data"})
+    })
+
+    it('it should return 200 and the shelf updated with a new data', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codShelf: "001023"
+            },
+            body:{
+                _name: "Shelf 3"
+            }
+        };
+
+        await updateShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if updating shelf data without correct shelf code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codShelf: "0a1023"
+            },
+            body:{
+                _name: "Shelf 3"
+            }
+        };
+
+        await updateShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Shelf not found"})
+    })
+
+    it('it should return 401 if updating shelf data without specified the shelf code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codShelf: ""
+            },
+            body:{
+                _name: "Shelf 3"
+            }
+        };
+        await updateShelfByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid shelf data"})
     })

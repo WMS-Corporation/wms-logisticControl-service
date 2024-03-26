@@ -1,7 +1,8 @@
 
 const {describe, it, expect} = require('@jest/globals')
-const {createShelf, getShelfsByCorridorCode, findShelfByCode} = require("../../src/repositories/shelfRepository");
+const {createShelf, getShelfsByCorridorCode, findShelfByCode, updateShelfData} = require("../../src/repositories/shelfRepository");
 const {Shelf} = require("../../src/entities/shelf");
+const {updateCorridorData} = require("../../src/repositories/corridorRepository");
 const shelfRepository = () => describe('Shelf testing', () => {
 
     it("it should create a new shelf", async ()  => {
@@ -27,6 +28,24 @@ const shelfRepository = () => describe('Shelf testing', () => {
 
         expect(shelf).toBeNull()
     });
+
+    it('it should return an updated shelf with new name', async() => {
+        const newName = "Shelf 12"
+        const filter = { _codShelf: "001023" }
+        const update = { $set: { _name: newName } }
+
+        const updatedShelf = await updateShelfData(filter, update)
+        expect(updatedShelf._name).toEqual(newName)
+    })
+
+    it('it should return null if the filter is not correct', async() => {
+        const newName = "Corridor 12"
+        const filter = { _codShelf: "" }
+        const update = { $set: { _name: newName } }
+
+        const updatedShelf = await updateShelfData(filter, update)
+        expect(updatedShelf).toBeNull()
+    })
 });
 
 module.exports = {shelfRepository}
