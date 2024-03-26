@@ -1,5 +1,6 @@
 const {Zone} = require("../../src/entities/zone")
-const {createZone, getZonesByStorageCode} = require("../../src/repositories/zoneRepository");
+const {createZone, getZonesByStorageCode, findZoneByCode} = require("../../src/repositories/zoneRepository");
+const {findStorageByCode} = require("../../src/repositories/storageRepository");
 
 const zoneRepository = () => describe('Zone testing', () => {
 
@@ -13,6 +14,19 @@ const zoneRepository = () => describe('Zone testing', () => {
         const result = await getZonesByStorageCode("001548")
         expect(result.length).toEqual(3)
     })
+
+    it('it should find a storage by code', async () => {
+        const zone = await findZoneByCode("096523")
+        const corridorCodeList = ["002023"]
+        expect(zone._corridorCodeList).toEqual(corridorCodeList)
+    });
+
+    it('it should return null if zone is not found', async () => {
+        const codZone = '000123'
+        const zone = await findZoneByCode(codZone)
+
+        expect(zone).toBeNull()
+    });
 
 });
 

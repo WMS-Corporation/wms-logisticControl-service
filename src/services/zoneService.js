@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const {createZoneFromData} = require("../factories/zoneFactory");
 const {findStorageByCode, generateUniqueCode, updateStorageData} = require("../repositories/storageRepository");
-const {createZone, getZonesByStorageCode} = require("../repositories/zoneRepository");
+const {createZone, getZonesByStorageCode, findZoneByCode} = require("../repositories/zoneRepository");
 
 /**
  * Generate a new zone.
@@ -73,7 +73,36 @@ const getAllZones = asyncHandler(async(req, res) => {
 
 })
 
+/**
+ * Retrieves zone by code.
+ *
+ * This function handles the retrieval of zone based on the provided code.
+ * It extracts the zone code from the request parameters.
+ * If the zone is provided, it calls the findZoneByCode function to search for the zone in the database.
+ * If the zone is found, it returns the zone data with HTTP status code 200 (OK).
+ * If the zone is not found, it returns an error message with HTTP status code 401 (Unauthorized).
+ * If the zone code is invalid or missing, it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The HTTP response containing either the zone data or an error message in JSON format.
+ */
+const getZoneByCode = asyncHandler(async (req, res) => {
+    const zoneCode = req.params.codZone
+    if(zoneCode){
+        const zone = await findZoneByCode(zoneCode)
+        if(zone){
+            res.status(200).json(zone)
+        } else{
+            res.status(401).json({message: 'Zone not found'})
+        }
+    }else{
+        res.status(401).json({message:'Invalid zone data'})
+    }
+})
+
 module.exports = {
     generateZone,
-    getAllZones
+    getAllZones,
+    getZoneByCode
 }

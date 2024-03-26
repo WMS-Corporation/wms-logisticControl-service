@@ -26,7 +26,20 @@ const getZonesByStorageCode = asyncHandler(async (codStorage) => {
     return storage._zoneCodeList
 })
 
+/**
+ * Finds a zone by code.
+ *
+ * This function queries the database to find a zone based on the provided code.
+ *
+ * @param {string} codZone - The code of the zone to find.
+ * @returns {Object|null} The zone object if found, or null if not found.
+ */
+const findZoneByCode = asyncHandler(async (codZone) => {
+    return await collections?.zones?.findOne({ _codZone: codZone })
+});
+
 module.exports = {
     createZone,
-    getZonesByStorageCode
+    getZonesByStorageCode,
+    findZoneByCode
 }
