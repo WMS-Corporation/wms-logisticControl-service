@@ -1,6 +1,7 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
-const {generateShelf} = require("../../src/services/shelfService");
+const {generateShelf, getAllShelfs} = require("../../src/services/shelfService");
+const {getAllCorridors} = require("../../src/services/corridorService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -78,6 +79,24 @@ const shelfService = () => describe('Shelf testing', () => {
 
         expect(res.status).toHaveBeenCalledWith(200)
     });
+
+    it('it should return 200 and all shelf of corridor', async() => {
+        const res = mockResponse()
+        req.params = { codCorridor: "002024" }
+        await getAllShelfs(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if the code of corridor does not exists or is not correct', async () => {
+        const res = mockResponse()
+        req.params = { codCorridor: "0a1877" }
+
+        await getAllShelfs(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Corridor not found"})
+    })
 
 });
 

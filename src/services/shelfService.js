@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const {createShelfFromData} = require("../factories/shelfFactory");
 const {findCorridorByCode, updateCorridorData} = require("../repositories/corridorRepository");
 const {generateUniqueCode} = require("../repositories/storageRepository");
-const {createShelf} = require("../repositories/shelfRepository");
+const {createShelf, getShelfsByCorridorCode} = require("../repositories/shelfRepository");
 
 /**
  * Generate a new shelf.
@@ -47,6 +47,34 @@ const generateShelf = asyncHandler(async(req, res) => {
 
 })
 
+/**
+ * Retrieves all shelf of specific corridor.
+ *
+ * This function handles the retrieval of all shelf, of specific corridor, from the database.
+ * It calls the getShelfsByCorridorCode function to fetch the shelf data.
+ * If the retrieval is successful, it returns the shelf data with HTTP status code 200 (OK).
+ * If the retrieval fails (e.g., invalid corridor data), it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The HTTP response containing either the shelf data or an error message in JSON format.
+ */
+const getAllShelfs = asyncHandler(async(req, res) => {
+    const corridor = await findCorridorByCode(req.params.codCorridor)
+    if(corridor){
+        const result = await getShelfsByCorridorCode(corridor._codCorridor)
+        if(result){
+            res.status(200).json(result)
+        } else {
+            res.status(401).json({message: 'Invalid shelf data'})
+        }
+    }else{
+        res.status(401).json({message: 'Corridor not found'})
+    }
+
+})
+
 module.exports = {
-    generateShelf
+    generateShelf,
+    getAllShelfs
 }
