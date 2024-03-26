@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const {createCorridorFromData} = require("../factories/corridorFactory");
 const {findZoneByCode, updateZoneData} = require("../repositories/zoneRepository");
 const {generateUniqueCode} = require("../repositories/storageRepository");
-const {createCorridor} = require("../repositories/corridorRepository");
+const {createCorridor, getCorridorsByZoneCode} = require("../repositories/corridorRepository");
 
 /**
  * Generate a new corridor.
@@ -47,6 +47,34 @@ const generateCorridor = asyncHandler(async(req, res) => {
 
 })
 
+/**
+ * Retrieves all corridors of specific zone.
+ *
+ * This function handles the retrieval of all corridors, of specific zone, from the database.
+ * It calls the getCorridorsByZoneCode function to fetch the corridor data.
+ * If the retrieval is successful, it returns the corridor data with HTTP status code 200 (OK).
+ * If the retrieval fails (e.g., invalid zone data), it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object.
+ * @returns {Object} The HTTP response containing either the corridor data or an error message in JSON format.
+ */
+const getAllCorridors = asyncHandler(async(req, res) => {
+    const zone = await findZoneByCode(req.params.codZone)
+    if(zone){
+        const result = await getCorridorsByZoneCode(zone._codZone)
+        if(result){
+            res.status(200).json(result)
+        } else {
+            res.status(401).json({message: 'Invalid corridor data'})
+        }
+    }else{
+        res.status(401).json({message: 'Zone not found'})
+    }
+
+})
+
 module.exports = {
-    generateCorridor
+    generateCorridor,
+    getAllCorridors
 }

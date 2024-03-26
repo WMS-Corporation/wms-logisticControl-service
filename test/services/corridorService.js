@@ -1,6 +1,7 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
-const {generateCorridor} = require("../../src/services/corridorService");
+const {generateCorridor, getAllCorridors} = require("../../src/services/corridorService");
+const {getAllZones} = require("../../src/services/zoneService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -78,6 +79,24 @@ const corridorService = () => describe('Corridor testing', () => {
 
         expect(res.status).toHaveBeenCalledWith(200)
     });
+
+    it('it should return 200 and all corridors of zone', async() => {
+        const res = mockResponse()
+        req.params = { codZone: "096723" }
+        await getAllCorridors(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if the code of zone does not exists or is not correct', async () => {
+        const res = mockResponse()
+        req.params = { codZone: "001877" }
+
+        await getAllCorridors(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Zone not found"})
+    })
 
 });
 
