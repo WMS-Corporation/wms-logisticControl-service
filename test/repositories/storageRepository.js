@@ -1,6 +1,6 @@
 const {Storage} = require("../../src/entities/storage")
 const {createStorage, getStorages, findStorageByCode, updateStorageData, deleteStorage} = require("../../src/repositories/storageRepository");
-
+const {describe, it, expect} = require('@jest/globals')
 const storageRepository = () => describe('Storage testing', () => {
 
     it("it should create a new storage", async ()  => {

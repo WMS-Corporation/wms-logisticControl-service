@@ -2,6 +2,7 @@
 const path = require("path");
 const fs = require("fs");
 const {createZoneFromData} = require("../../src/factories/zoneFactory");
+const {describe, beforeAll, it, expect} = require('@jest/globals')
 describe('Zone testing', () => {
     let zone;
 

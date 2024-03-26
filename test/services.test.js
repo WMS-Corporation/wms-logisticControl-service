@@ -1,7 +1,7 @@
 const {connectDB, closeDB, collections} = require("../src/config/dbConnection");
 const {resolve} = require("path");
 const {readFileSync} = require("fs");
-const {describe, beforeAll, beforeEach, afterAll} = require('@jest/globals')
+const {describe, beforeAll, afterAll} = require('@jest/globals')
 const {storageService} = require("./services/storageService");
 const {zoneService} = require("./services/zoneService");
 

@@ -3,7 +3,7 @@ const {resolve} = require("path");
 const {readFileSync} = require("fs");
 const {storageRepository} = require("./repositories/storageRepository");
 const {zoneRepository} = require("./repositories/zoneRepository");
-const {describe, beforeAll, beforeEach, afterAll} = require('@jest/globals')
+const {describe, beforeAll, afterAll} = require('@jest/globals')
 
 describe('Repository testing', () => {
     beforeAll(async () => {

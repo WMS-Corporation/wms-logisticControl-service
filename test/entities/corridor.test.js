@@ -2,6 +2,7 @@
 const path = require("path");
 const fs = require("fs");
 const {createCorridorFromData} = require("../../src/factories/corridorFactory");
+const {describe, beforeAll, it, expect} = require('@jest/globals')
 describe('Corridor testing', () => {
     let corridor;
 
