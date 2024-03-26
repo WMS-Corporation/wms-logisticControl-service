@@ -1,5 +1,12 @@
-{
-  "_name" : "Shelf 1",
-  "_productCodeList" : ["000234","000123","000456"],
-  "_codShelf": "001023"
-}
+[
+  {
+    "_name" : "Shelf 1",
+    "_productCodeList" : ["000234","000123","000456"],
+    "_codShelf": "001023"
+  },
+  {
+    "_name" : "Shelf 2",
+    "_productCodeList" : ["001234","002123","003456"],
+    "_codShelf": "001025"
+  }
+]

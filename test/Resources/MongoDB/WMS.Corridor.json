@@ -1,5 +1,12 @@
-{
-  "_name" : "Corridor 1",
-  "_shelfCodeList" : ["001023"],
-  "_codCorridor": "002023"
-}
+[
+  {
+    "_name" : "Corridor 1",
+    "_shelfCodeList" : ["001023"],
+    "_codCorridor": "002023"
+  },
+  {
+    "_name" : "Corridor 2",
+    "_shelfCodeList" : ["001025"],
+    "_codCorridor": "002024"
+  }
+]

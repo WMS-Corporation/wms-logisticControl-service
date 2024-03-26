@@ -4,7 +4,7 @@ const {createCorridor, getCorridorsByZoneCode, findCorridorByCode, updateCorrido
 const {findZoneByCode, updateZoneData, deleteZone} = require("../../src/repositories/zoneRepository");
 const corridorRepository = () => describe('Storage testing', () => {
 
-    it("it should create a new storage", async ()  => {
+    it("it should create a new corridor", async ()  => {
         let shelfCodeList = [ "01120", "01124"]
         const result = await createCorridor(new Corridor("Corridor 2", shelfCodeList, "001878"))
         expect(result).toBeDefined()
