@@ -1,7 +1,6 @@
 const {Corridor} = require("../../src/entities/corridor")
 const {describe, it, expect} = require('@jest/globals')
 const {createCorridor, getCorridorsByZoneCode, findCorridorByCode, updateCorridorData, deleteCorridor} = require("../../src/repositories/corridorRepository");
-const {findZoneByCode, updateZoneData, deleteZone} = require("../../src/repositories/zoneRepository");
 const corridorRepository = () => describe('Storage testing', () => {
 
     it("it should create a new corridor", async ()  => {

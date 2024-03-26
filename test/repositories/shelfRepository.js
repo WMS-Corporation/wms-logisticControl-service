@@ -1,8 +1,7 @@
 
 const {describe, it, expect} = require('@jest/globals')
-const {createShelf, getShelfsByCorridorCode, findShelfByCode, updateShelfData} = require("../../src/repositories/shelfRepository");
+const {createShelf, getShelfsByCorridorCode, findShelfByCode, updateShelfData, deleteShelf} = require("../../src/repositories/shelfRepository");
 const {Shelf} = require("../../src/entities/shelf");
-const {updateCorridorData} = require("../../src/repositories/corridorRepository");
 const shelfRepository = () => describe('Shelf testing', () => {
 
     it("it should create a new shelf", async ()  => {
@@ -45,6 +44,14 @@ const shelfRepository = () => describe('Shelf testing', () => {
 
         const updatedShelf = await updateShelfData(filter, update)
         expect(updatedShelf).toBeNull()
+    })
+
+    it('it should return null if the shelf has been deleted', async() => {
+        const shelfCode = '001023'
+        await deleteShelf(shelfCode)
+        const deletedShelf = await findShelfByCode(shelfCode)
+
+        expect(deletedShelf).toBeNull()
     })
 });
 

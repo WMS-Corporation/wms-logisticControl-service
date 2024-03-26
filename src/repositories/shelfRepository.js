@@ -64,10 +64,23 @@ const updateShelfData = asyncHandler(async(filter, update) => {
     return await collections?.shelfs?.findOne(filter)
 })
 
+/**
+ * Deletes a shelf based on shelf code.
+ *
+ * This function deletes a shelf based on the provided shelf code.
+ *
+ * @param {string} codShelf - The code of the shelf to be deleted.
+ * @returns {Object} The result of the deletion operation.
+ */
+const deleteShelf = asyncHandler(async (codShelf) => {
+    return await collections?.shelfs?.deleteOne({_codShelf: codShelf})
+})
+
 module.exports = {
     createShelf,
     getShelfsByCorridorCode,
     getShelf,
     findShelfByCode,
-    updateShelfData
+    updateShelfData,
+    deleteShelf
 }

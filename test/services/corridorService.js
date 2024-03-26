@@ -1,7 +1,6 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
 const {generateCorridor, getAllCorridors, getCorridorByCode, updateCorridorByCode, deleteCorridorByCode} = require("../../src/services/corridorService");
-const {getAllZones, getZoneByCode, updateZoneByCode, deleteZoneByCode} = require("../../src/services/zoneService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -72,7 +71,7 @@ const corridorService = () => describe('Corridor testing', () => {
         req.params = { codZone: "096723"}
         req.body = {
             _name : "Corridor 2",
-            _shelfCodeList : ["001023"]
+            _shelfCodeList : ["001023", "123098"]
         }
 
         await generateCorridor(req, res)
@@ -195,7 +194,7 @@ const corridorService = () => describe('Corridor testing', () => {
         expect(res.json).toHaveBeenCalledWith({message: "Corridor not found"})
     })
 
-    it('it should return 401 if deleting zone without specified the zone code', async () => {
+    it('it should return 401 if deleting corridor without specified the corridor code', async () => {
         const res = mockResponse()
         const req = {
             params: {

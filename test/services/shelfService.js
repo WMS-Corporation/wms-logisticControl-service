@@ -1,7 +1,6 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
-const {generateShelf, getAllShelfs, getShelfByCode, updateShelfByCode} = require("../../src/services/shelfService");
-const {getAllCorridors, getCorridorByCode, updateCorridorByCode} = require("../../src/services/corridorService");
+const {generateShelf, getAllShelfs, getShelfByCode, updateShelfByCode, deleteShelfByCode} = require("../../src/services/shelfService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -168,6 +167,43 @@ const shelfService = () => describe('Shelf testing', () => {
             }
         };
         await updateShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid shelf data"})
+    })
+
+    it('it should return 200 and the code of the shelf that has been deleted', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codShelf: "001023"
+            }
+        }
+        await deleteShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if deleting shelf without correct shelf code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codShelf: "0b0978"
+            }
+        };
+
+        await deleteShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Shelf not found"})
+    })
+
+    it('it should return 401 if deleting shelf without specified the shelf code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codShelf: ""
+            }
+        };
+        await deleteShelfByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid shelf data"})
     })

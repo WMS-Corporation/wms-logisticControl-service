@@ -134,7 +134,7 @@ const updateCorridorByCode = asyncHandler(async (req, res) => {
 })
 
 /**
- * Deletes corridor by zone corridor.
+ * Deletes corridor by it code.
  *
  * This function deletes a corridor based on the provided corridor code.
  * It extracts the corridor code from the request parameters.

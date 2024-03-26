@@ -1,8 +1,8 @@
 const asyncHandler = require("express-async-handler");
 const {createShelfFromData} = require("../factories/shelfFactory");
-const {findCorridorByCode, updateCorridorData} = require("../repositories/corridorRepository");
+const {findCorridorByCode, updateCorridorData, getCorridors} = require("../repositories/corridorRepository");
 const {generateUniqueCode} = require("../repositories/storageRepository");
-const {createShelf, getShelfsByCorridorCode, findShelfByCode, updateShelfData} = require("../repositories/shelfRepository");
+const {createShelf, getShelfsByCorridorCode, findShelfByCode, updateShelfData, deleteShelf} = require("../repositories/shelfRepository");
 
 /**
  * Generate a new shelf.
@@ -133,9 +133,50 @@ const updateShelfByCode = asyncHandler(async (req, res) => {
     }
 })
 
+/**
+ * Deletes shelf by it code.
+ *
+ * This function deletes a shelf based on the provided shelf code.
+ * It extracts the shelf code from the request parameters.
+ * If the shelf code is provided, it retrieves the shelf data using findShelfByCode function.
+ * If the shelf is found, it deletes the shelf from the database and returns the deleted shelf code with HTTP status code 200 (OK).
+ * If the shelf is not found, it returns an error message with HTTP status code 401 (Unauthorized).
+ * If the shelf code is invalid or missing, it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object containing shelf data.
+ * @param {Object} res - The response object used to send the response.
+ * @returns {Object} The HTTP response containing either the deleted shelf code or an error message in JSON format.
+ */
+const deleteShelfByCode = asyncHandler(async (req, res) => {
+    const codShelf = req.params.codShelf
+    if(codShelf){
+        const shelf = await findShelfByCode(codShelf)
+        if(shelf){
+            const shelfCode = shelf._codShelf
+            await deleteShelf(shelfCode)
+            let corridors = await getCorridors();
+            for (const corridor of corridors){
+                const index = corridor._shelfCodeList.indexOf(codShelf);
+                if (index !== -1) {
+                    corridor._shelfCodeList.splice(index, 1);
+                    const filter = { _codCorridor: corridor._codCorridor }
+                    const update = { $set: {_shelfCodeList: corridor._shelfCodeList}}
+                    await updateCorridorData(filter, update)
+                }
+            }
+            res.status(200).json(shelfCode)
+        } else{
+            res.status(401).json({message: 'Shelf not found'})
+        }
+    }else{
+        res.status(401).json({message:'Invalid shelf data'})
+    }
+})
+
 module.exports = {
     generateShelf,
     getAllShelfs,
     getShelfByCode,
-    updateShelfByCode
+    updateShelfByCode,
+    deleteShelfByCode
 }
