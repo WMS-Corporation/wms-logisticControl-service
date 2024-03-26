@@ -9,7 +9,7 @@ describe('Shelf testing', () => {
     beforeAll(() => {
         const jsonFilePath = path.resolve(__dirname, '../Resources/MongoDB/WMS.Shelf.json')
         const shelfData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'))
-        shelf = createShelfFromData(shelfData)
+        shelf = createShelfFromData(shelfData[0])
     });
 
     it('it should return the correct code of shelf', () => {

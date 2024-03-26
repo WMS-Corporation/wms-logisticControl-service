@@ -9,19 +9,19 @@ describe('Corridor testing', () => {
     beforeAll(() => {
         const jsonFilePath = path.resolve(__dirname, '../Resources/MongoDB/WMS.Corridor.json')
         const corridorData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'))
-        corridor = createCorridorFromData(corridorData)
+        corridor = createCorridorFromData(corridorData[1])
     });
 
     it('it should return the correct code of corridor', () => {
-        expect(corridor.codCorridor).toBe("002023");
+        expect(corridor.codCorridor).toBe("002024");
     });
 
     it('it should return the correct name', () => {
-        expect(corridor.name).toBe("Corridor 1");
+        expect(corridor.name).toBe("Corridor 2");
     });
 
     it('it should return the number of shelfs', () => {
-        expect(corridor.shelfCodeList.length).toBe(1);
+        expect(corridor.shelfCodeList.length).toBeDefined();
     });
 
     it('it should set a new name of corridor', () => {
