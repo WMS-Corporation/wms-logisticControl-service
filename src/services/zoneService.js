@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const {createZoneFromData} = require("../factories/zoneFactory");
 const {findStorageByCode, generateUniqueCode, updateStorageData} = require("../repositories/storageRepository");
-const {createZone, getZonesByStorageCode, findZoneByCode} = require("../repositories/zoneRepository");
+const {createZone, getZonesByStorageCode, findZoneByCode, updateZoneData} = require("../repositories/zoneRepository");
 
 /**
  * Generate a new zone.
@@ -101,8 +101,40 @@ const getZoneByCode = asyncHandler(async (req, res) => {
     }
 })
 
+/**
+ * Updates zone data by code.
+ *
+ * This function updates the zone data based on the provided zone code.
+ * It extracts the zone code from the request parameters.
+ * If the zone code is provided, it retrieves the zone data using findZoneByCode function.
+ * If the zone is found, it updates the zone data in the database and returns the updated zone data with HTTP status code 200 (OK).
+ * If the zone is not found, it returns an error message with HTTP status code 401 (Unauthorized).
+ * If the zone code is invalid or missing, it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object containing zone data.
+ * @param {Object} res - The response object used to send the response.
+ * @returns {Object} The HTTP response containing either the updated zone data or an error message in JSON format.
+ */
+const updateZoneByCode = asyncHandler(async (req, res) => {
+    const codZone = req.params.codZone
+    if(codZone){
+        const zone = await findZoneByCode(codZone)
+        if(zone){
+            const filter = { _codZone: codZone }
+            const update = { $set: req.body}
+            const updatedZone = await updateZoneData(filter, update)
+            res.status(200).json(updatedZone)
+        } else{
+            res.status(401).json({message: 'Zone not found'})
+        }
+    }else{
+        res.status(401).json({message:'Invalid zone data'})
+    }
+})
+
 module.exports = {
     generateZone,
     getAllZones,
-    getZoneByCode
+    getZoneByCode,
+    updateZoneByCode
 }

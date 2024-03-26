@@ -1,7 +1,4 @@
 const dotenv = require('dotenv')
-const path = require("path")
-const fs = require("fs")
-const {connectDB, collections, closeDB} = require("../../src/config/dbConnection");
 const {generateStorage, getAll, getStorageByCode, updateStorageByCode, deleteStorageByCode} = require("../../src/services/storageService");
 
 dotenv.config()

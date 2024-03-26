@@ -38,8 +38,24 @@ const findZoneByCode = asyncHandler(async (codZone) => {
     return await collections?.zones?.findOne({ _codZone: codZone })
 });
 
+/**
+ * Updates zone data based on a filter.
+ *
+ * This function updates zone data based on the provided filter criteria and the update object.
+ *
+ * @param {Object} filter - The filter criteria to find the zone(s) to update.
+ * @param {Object} update - The update object containing the fields to update and their new values.
+ * @returns {Object|null} The updated zone data if the zone is found, otherwise null.
+ */
+const updateZoneData = asyncHandler(async(filter, update) => {
+    const options = { returnOriginal: false}
+    await collections?.zones?.findOneAndUpdate(filter, update, options)
+    return await collections?.zones?.findOne(filter)
+})
+
 module.exports = {
     createZone,
     getZonesByStorageCode,
-    findZoneByCode
+    findZoneByCode,
+    updateZoneData
 }

@@ -1,6 +1,6 @@
 const {Zone} = require("../../src/entities/zone")
-const {createZone, getZonesByStorageCode, findZoneByCode} = require("../../src/repositories/zoneRepository");
-const {findStorageByCode} = require("../../src/repositories/storageRepository");
+const {createZone, getZonesByStorageCode, findZoneByCode, updateZoneData} = require("../../src/repositories/zoneRepository");
+const {findStorageByCode, updateStorageData} = require("../../src/repositories/storageRepository");
 
 const zoneRepository = () => describe('Zone testing', () => {
 
@@ -27,6 +27,24 @@ const zoneRepository = () => describe('Zone testing', () => {
 
         expect(zone).toBeNull()
     });
+
+    it('it should return an updated zone with new list of corridor', async() => {
+        const newCorridorCodeList = ["001124", "123198"]
+        const filter = { _codZone: "096523" }
+        const update = { $set: { _corridorCodeList: newCorridorCodeList } }
+
+        const updatedZone = await updateZoneData(filter, update)
+        expect(updatedZone._corridorCodeList).toEqual(newCorridorCodeList)
+    })
+
+    it('it should return null if the filter is not correct', async() => {
+        const newCorridorCodeList = ["001124", "123198"]
+        const filter = { _codZone: "" }
+        const update = { $set: { _corridorCodeList: newCorridorCodeList } }
+
+        const updatedZone = await updateZoneData(filter, update)
+        expect(updatedZone).toBeNull()
+    })
 
 });
 

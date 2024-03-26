@@ -1,9 +1,6 @@
 const dotenv = require('dotenv')
-const path = require("path")
-const fs = require("fs")
-const {connectDB, collections, closeDB} = require("../../src/config/dbConnection");
-const {generateZone, getAllZones, getZoneByCode} = require("../../src/services/zoneService");
-const {getStorageByCode} = require("../../src/services/storageService");
+const {generateZone, getAllZones, getZoneByCode, updateZoneByCode} = require("../../src/services/zoneService");
+const {updateStorageByCode} = require("../../src/services/storageService");
 
 dotenv.config()
 const mockResponse = () => {
@@ -132,6 +129,51 @@ const zoneService = () => describe('Zone testing', () => {
         req.params = { codZone: "" }
 
         await getZoneByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid zone data"})
+    })
+
+    it('it should return 200 and the zone updated with a new data', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codZone: "096523"
+            },
+            body:{
+                _name: "zone 1"
+            }
+        };
+
+        await updateZoneByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if updating zone data without correct zone code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codZone: "0001877"
+            }, body:{
+                _name: "zone 1"
+            }
+        };
+
+        await updateZoneByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Zone not found"})
+    })
+
+    it('it should return 401 if updating zone data without specified the zone code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codZone: ""
+            }, body:{
+                _name: "zone 1"
+            }
+        };
+        await updateZoneByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid zone data"})
     })
