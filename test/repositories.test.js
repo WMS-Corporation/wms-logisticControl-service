@@ -4,6 +4,7 @@ const {readFileSync} = require("fs");
 const {storageRepository} = require("./repositories/storageRepository");
 const {zoneRepository} = require("./repositories/zoneRepository");
 const {describe, beforeAll, afterAll} = require('@jest/globals')
+const {corridorRepository} = require("./repositories/corridorRepository");
 
 describe('Repository testing', () => {
     beforeAll(async () => {
@@ -11,6 +12,7 @@ describe('Repository testing', () => {
 
         await collections.storage.deleteMany()
         await collections.zones.deleteMany()
+        await collections.corridors.deleteMany()
 
         const jsonFilePathStorage = resolve(__dirname, 'Resources/MongoDB/WMS.Storage.json');
         const storageData =  JSON.parse(readFileSync(jsonFilePathStorage, 'utf-8'));
@@ -18,7 +20,11 @@ describe('Repository testing', () => {
 
         const jsonFilePathZone = resolve(__dirname, 'Resources/MongoDB/WMS.Zone.json');
         const zoneData = JSON.parse(readFileSync(jsonFilePathZone, 'utf-8'));
-        await collections.zones.insertOne(zoneData)
+        await collections.zones.insertMany(zoneData)
+
+        const jsonFilePathCorridor = resolve(__dirname, 'Resources/MongoDB/WMS.Corridor.json');
+        const corridorData = JSON.parse(readFileSync(jsonFilePathCorridor, 'utf-8'));
+        await collections.corridors.insertOne(corridorData)
     });
 
     afterAll(async () => {
@@ -27,5 +33,6 @@ describe('Repository testing', () => {
 
     storageRepository()
     zoneRepository()
+    corridorRepository()
 
 });

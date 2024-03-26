@@ -160,7 +160,7 @@ const deleteZoneByCode = asyncHandler(async (req, res) => {
                     storage._zoneCodeList.splice(index, 1);
                     const filter = { _codStorage: storage._codStorage }
                     const update = { $set: {_zoneCodeList: storage._zoneCodeList}}
-                    const updatedStorage = await updateStorageData(filter, update)
+                    await updateStorageData(filter, update)
                 }
             }
             res.status(200).json(zoneCode)

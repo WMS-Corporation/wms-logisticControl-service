@@ -2,6 +2,7 @@ const express = require('express');
 const {generateStorage, getAll, getStorageByCode, updateStorageByCode, deleteStorageByCode} = require("../services/storageService");
 const {verifyToken} = require("./authMiddleware");
 const {generateZone, getAllZones, getZoneByCode, updateZoneByCode, deleteZoneByCode} = require("../services/zoneService");
+const {generateCorridor} = require("../services/corridorService");
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -18,4 +19,6 @@ router.get("/storage/:codStorage/zone", verifyToken, getAllZones)
 router.get('/zone/:codZone', verifyToken, getZoneByCode)
 router.put('/zone/:codZone', verifyToken, updateZoneByCode)
 router.delete("/zone/:codZone", verifyToken, deleteZoneByCode)
+
+router.post('/zone/:codZone/corridor', verifyToken, generateCorridor)
 module.exports = router

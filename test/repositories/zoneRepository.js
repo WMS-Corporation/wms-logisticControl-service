@@ -16,7 +16,7 @@ const zoneRepository = () => describe('Zone testing', () => {
 
     it('it should find a storage by code', async () => {
         const zone = await findZoneByCode("096523")
-        const corridorCodeList = ["002023"]
+        const corridorCodeList = ["002026"]
         expect(zone._corridorCodeList).toEqual(corridorCodeList)
     });
 

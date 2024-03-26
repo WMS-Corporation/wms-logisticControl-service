@@ -1,7 +1,16 @@
-{
-  "_temperature": 23.5,
-  "_coolingSystemStatus": "Active",
-  "_humidityLevel": 50,
-  "_corridorCodeList": ["002023"],
-  "_codZone" : "096523"
-}
+[
+  {
+    "_temperature": 23.5,
+    "_coolingSystemStatus": "Active",
+    "_humidityLevel": 50,
+    "_corridorCodeList": ["002026"],
+    "_codZone" : "096523"
+  },
+  {
+    "_temperature": 19.5,
+    "_coolingSystemStatus": "Active",
+    "_humidityLevel": 47,
+    "_corridorCodeList": ["002023"],
+    "_codZone" : "096723"
+  }
+]

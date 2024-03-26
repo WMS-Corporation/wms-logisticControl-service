@@ -9,7 +9,7 @@ describe('Zone testing', () => {
     beforeAll(() => {
         const jsonFilePath = path.resolve(__dirname, '../Resources/MongoDB/WMS.Zone.json')
         const zoneData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'))
-        zone = createZoneFromData(zoneData)
+        zone = createZoneFromData(zoneData[0])
     });
 
     it('it should return the correct code of zone', () => {
