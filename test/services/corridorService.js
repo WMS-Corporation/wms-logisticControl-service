@@ -1,7 +1,7 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
-const {generateCorridor, getAllCorridors} = require("../../src/services/corridorService");
-const {getAllZones} = require("../../src/services/zoneService");
+const {generateCorridor, getAllCorridors, getCorridorByCode} = require("../../src/services/corridorService");
+const {getAllZones, getZoneByCode} = require("../../src/services/zoneService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -96,6 +96,33 @@ const corridorService = () => describe('Corridor testing', () => {
         await getAllCorridors(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Zone not found"})
+    })
+
+    it('it should return 200 and the corridor with the code specified', async () => {
+        const res = mockResponse()
+        req.params = { codCorridor: "002023" }
+
+        await getCorridorByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if the code is wrong', async () => {
+        const res = mockResponse()
+        req.params = { codCorridor: "asddfve" }
+
+        await getCorridorByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Corridor not found"})
+    })
+
+    it('it should return 401 if the code is not specified', async () => {
+        const res = mockResponse()
+        req.params = { codCorridor: "" }
+
+        await getCorridorByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid corridor data"})
     })
 
 });

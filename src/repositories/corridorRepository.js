@@ -26,7 +26,20 @@ const getCorridorsByZoneCode = asyncHandler(async (codZone) => {
     return zone._corridorCodeList
 })
 
+/**
+ * Finds a corridor by code.
+ *
+ * This function queries the database to find a corridor based on the provided code.
+ *
+ * @param {string} codCorridor - The code of the corridor to find.
+ * @returns {Object|null} The corridor object if found, or null if not found.
+ */
+const findCorridorByCode = asyncHandler(async (codCorridor) => {
+    return await collections?.corridors?.findOne({ _codCorridor: codCorridor })
+});
+
 module.exports = {
     createCorridor,
-    getCorridorsByZoneCode
+    getCorridorsByZoneCode,
+    findCorridorByCode
 }
