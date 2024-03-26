@@ -53,9 +53,22 @@ const updateZoneData = asyncHandler(async(filter, update) => {
     return await collections?.zones?.findOne(filter)
 })
 
+/**
+ * Deletes a zone based on zone code.
+ *
+ * This function deletes a zone based on the provided zone code.
+ *
+ * @param {string} codZone - The zone code of the zone to be deleted.
+ * @returns {Object} The result of the deletion operation.
+ */
+const deleteZone = asyncHandler(async (codZone) => {
+    return await collections?.zones?.deleteOne({_codZone: codZone})
+})
+
 module.exports = {
     createZone,
     getZonesByStorageCode,
     findZoneByCode,
-    updateZoneData
+    updateZoneData,
+    deleteZone
 }

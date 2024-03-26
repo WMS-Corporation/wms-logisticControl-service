@@ -1,6 +1,6 @@
 const dotenv = require('dotenv')
-const {generateZone, getAllZones, getZoneByCode, updateZoneByCode} = require("../../src/services/zoneService");
-const {updateStorageByCode} = require("../../src/services/storageService");
+const {generateZone, getAllZones, getZoneByCode, updateZoneByCode, deleteZoneByCode} = require("../../src/services/zoneService");
+const {updateStorageByCode, deleteStorageByCode} = require("../../src/services/storageService");
 
 dotenv.config()
 const mockResponse = () => {
@@ -174,6 +174,43 @@ const zoneService = () => describe('Zone testing', () => {
             }
         };
         await updateZoneByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid zone data"})
+    })
+
+    it('it should return 200 and the code of the zone that has been deleted', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codZone: "096523"
+            }
+        }
+        await deleteZoneByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if deleting zone without correct zone code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codZone: "000978"
+            }
+        };
+
+        await deleteZoneByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Zone not found"})
+    })
+
+    it('it should return 401 if deleting zone without specified the zone code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codZone: ""
+            }
+        };
+        await deleteZoneByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid zone data"})
     })

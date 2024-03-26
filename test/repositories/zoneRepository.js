@@ -1,6 +1,6 @@
 const {Zone} = require("../../src/entities/zone")
-const {createZone, getZonesByStorageCode, findZoneByCode, updateZoneData} = require("../../src/repositories/zoneRepository");
-const {findStorageByCode, updateStorageData} = require("../../src/repositories/storageRepository");
+const {createZone, getZonesByStorageCode, findZoneByCode, updateZoneData, deleteZone} = require("../../src/repositories/zoneRepository");
+const {findStorageByCode, updateStorageData, deleteStorage} = require("../../src/repositories/storageRepository");
 
 const zoneRepository = () => describe('Zone testing', () => {
 
@@ -44,6 +44,14 @@ const zoneRepository = () => describe('Zone testing', () => {
 
         const updatedZone = await updateZoneData(filter, update)
         expect(updatedZone).toBeNull()
+    })
+
+    it('it should return null if the zone has been deleted', async() => {
+        const zoneCode = '096523'
+        await deleteZone(zoneCode)
+        const deletedZone = await findZoneByCode(zoneCode)
+
+        expect(deletedZone).toBeNull()
     })
 
 });
