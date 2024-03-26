@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const {createCorridorFromData} = require("../factories/corridorFactory");
 const {findZoneByCode, updateZoneData} = require("../repositories/zoneRepository");
 const {generateUniqueCode} = require("../repositories/storageRepository");
-const {createCorridor, getCorridorsByZoneCode, findCorridorByCode} = require("../repositories/corridorRepository");
+const {createCorridor, getCorridorsByZoneCode, findCorridorByCode, updateCorridorData} = require("../repositories/corridorRepository");
 
 /**
  * Generate a new corridor.
@@ -102,8 +102,40 @@ const getCorridorByCode = asyncHandler(async (req, res) => {
     }
 })
 
+/**
+ * Updates corridor data by code.
+ *
+ * This function updates the corridor data based on the provided corridor code.
+ * It extracts the corridor code from the request parameters.
+ * If the corridor code is provided, it retrieves the corridor data using findCorridorByCode function.
+ * If the corridor is found, it updates the corridor data in the database and returns the updated corridor data with HTTP status code 200 (OK).
+ * If the corridor is not found, it returns an error message with HTTP status code 401 (Unauthorized).
+ * If the corridor code is invalid or missing, it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object containing corridor data.
+ * @param {Object} res - The response object used to send the response.
+ * @returns {Object} The HTTP response containing either the updated corridor data or an error message in JSON format.
+ */
+const updateCorridorByCode = asyncHandler(async (req, res) => {
+    const codCorridor = req.params.codCorridor
+    if(codCorridor){
+        const corridor = await findCorridorByCode(codCorridor)
+        if(corridor){
+            const filter = { _codCorridor: codCorridor }
+            const update = { $set: req.body}
+            const updatedCorridor = await updateCorridorData(filter, update)
+            res.status(200).json(updatedCorridor)
+        } else{
+            res.status(401).json({message: 'Corridor not found'})
+        }
+    }else{
+        res.status(401).json({message:'Invalid corridor data'})
+    }
+})
+
 module.exports = {
     generateCorridor,
     getAllCorridors,
-    getCorridorByCode
+    getCorridorByCode,
+    updateCorridorByCode
 }

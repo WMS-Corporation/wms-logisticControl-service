@@ -1,7 +1,7 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
-const {generateCorridor, getAllCorridors, getCorridorByCode} = require("../../src/services/corridorService");
-const {getAllZones, getZoneByCode} = require("../../src/services/zoneService");
+const {generateCorridor, getAllCorridors, getCorridorByCode, updateCorridorByCode} = require("../../src/services/corridorService");
+const {getAllZones, getZoneByCode, updateZoneByCode} = require("../../src/services/zoneService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -121,6 +121,51 @@ const corridorService = () => describe('Corridor testing', () => {
         req.params = { codCorridor: "" }
 
         await getCorridorByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid corridor data"})
+    })
+
+    it('it should return 200 and the corridor updated with a new data', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codCorridor: "002023"
+            },
+            body:{
+                _name: "Corridor 3"
+            }
+        };
+
+        await updateCorridorByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
+    it('it should return 401 if updating corridor data without correct corridor code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codCorridor: "0001877"
+            }, body:{
+                _name: "Corridor 3"
+            }
+        };
+
+        await updateCorridorByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Corridor not found"})
+    })
+
+    it('it should return 401 if updating corridor data without specified the corridor code', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codCorridor: ""
+            }, body:{
+                _name: "Corridor 3"
+            }
+        };
+        await updateCorridorByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid corridor data"})
     })

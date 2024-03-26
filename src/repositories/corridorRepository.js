@@ -38,8 +38,24 @@ const findCorridorByCode = asyncHandler(async (codCorridor) => {
     return await collections?.corridors?.findOne({ _codCorridor: codCorridor })
 });
 
+/**
+ * Updates corridor data based on a filter.
+ *
+ * This function updates corridor data based on the provided filter criteria and the update object.
+ *
+ * @param {Object} filter - The filter criteria to find the corridor(s) to update.
+ * @param {Object} update - The update object containing the fields to update and their new values.
+ * @returns {Object|null} The updated corridor data if the corridor is found, otherwise null.
+ */
+const updateCorridorData = asyncHandler(async(filter, update) => {
+    const options = { returnOriginal: false}
+    await collections?.corridors?.findOneAndUpdate(filter, update, options)
+    return await collections?.corridors?.findOne(filter)
+})
+
 module.exports = {
     createCorridor,
     getCorridorsByZoneCode,
-    findCorridorByCode
+    findCorridorByCode,
+    updateCorridorData
 }

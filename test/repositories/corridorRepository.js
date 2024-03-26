@@ -1,7 +1,7 @@
 const {Corridor} = require("../../src/entities/corridor")
 const {describe, it, expect} = require('@jest/globals')
-const {createCorridor, getCorridorsByZoneCode, findCorridorByCode} = require("../../src/repositories/corridorRepository");
-const {findZoneByCode} = require("../../src/repositories/zoneRepository");
+const {createCorridor, getCorridorsByZoneCode, findCorridorByCode, updateCorridorData} = require("../../src/repositories/corridorRepository");
+const {findZoneByCode, updateZoneData} = require("../../src/repositories/zoneRepository");
 const corridorRepository = () => describe('Storage testing', () => {
 
     it("it should create a new storage", async ()  => {
@@ -27,6 +27,24 @@ const corridorRepository = () => describe('Storage testing', () => {
 
         expect(corridor).toBeNull()
     });
+
+    it('it should return an updated corridor with new name', async() => {
+        const newName = "Corridor 12"
+        const filter = { _codCorridor: "002023" }
+        const update = { $set: { _name: newName } }
+
+        const updatedCorridor = await updateCorridorData(filter, update)
+        expect(updatedCorridor._name).toEqual(newName)
+    })
+
+    it('it should return null if the filter is not correct', async() => {
+        const newName = "Corridor 12"
+        const filter = { _codCorridor: "" }
+        const update = { $set: { _name: newName } }
+
+        const updatedCorridor = await updateCorridorData(filter, update)
+        expect(updatedCorridor).toBeNull()
+    })
 
 });
 
