@@ -1,6 +1,7 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
 const {generateShelf, getAllShelfs, getShelfByCode, updateShelfByCode, deleteShelfByCode} = require("../../src/services/shelfService");
+const {updateStorageByCode} = require("../../src/services/storageService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -169,6 +170,20 @@ const shelfService = () => describe('Shelf testing', () => {
         await updateShelfByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid shelf data"})
+    })
+
+    it('it should return 401 if try to updating field that is not specified for the shelf ', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codShelf: "001023"
+            }, body:{
+                _names: "storage 1"
+            }
+        };
+        await updateShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Shelf does not contain any of the specified fields."})
     })
 
     it('it should return 200 and the code of the shelf that has been deleted', async () => {

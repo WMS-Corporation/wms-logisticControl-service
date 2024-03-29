@@ -83,7 +83,7 @@ const getStorageByCode = asyncHandler(async (req, res) => {
  *
  * This function updates the storage data based on the provided storage code.
  * It extracts the storage code from the request parameters.
- * If the storage code is provided, it retrieves the storage data using findStorageByCode function.
+ * If the storage code is provided and the field that try to update is correct, it retrieves the storage data using findStorageByCode function.
  * If the storage is found, it updates the storage data in the database and returns the updated storage data with HTTP status code 200 (OK).
  * If the storage is not found, it returns an error message with HTTP status code 401 (Unauthorized).
  * If the storage code is invalid or missing, it returns an error message with HTTP status code 401 (Unauthorized).
@@ -94,13 +94,24 @@ const getStorageByCode = asyncHandler(async (req, res) => {
  */
 const updateStorageByCode = asyncHandler(async (req, res) => {
     const codStorage = req.params.codStorage
+
+    let foundValidField = false;
+
+    if (Object.prototype.hasOwnProperty.call(req.body, "_zoneCodeList")) {
+        foundValidField = true
+    }
+
     if(codStorage){
         const storage = await findStorageByCode(codStorage)
         if(storage){
-            const filter = { _codStorage: codStorage }
-            const update = { $set: req.body}
-            const updatedOrder = await updateStorageData(filter, update)
-            res.status(200).json(updatedOrder)
+            if(!foundValidField){
+                res.status(401).json({message: 'Storage does not contain any of the specified fields.'})
+            } else {
+                const filter = { _codStorage: codStorage }
+                const update = { $set: req.body}
+                const updatedOrder = await updateStorageData(filter, update)
+                res.status(200).json(updatedOrder)
+            }
         } else{
             res.status(401).json({message: 'Storage not found'})
         }

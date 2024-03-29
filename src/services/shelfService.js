@@ -108,7 +108,7 @@ const getShelfByCode = asyncHandler(async (req, res) => {
  * This function updates the shelf data based on the provided shelf code.
  * It extracts the shelf code from the request parameters.
  * If the shelf code is provided, it retrieves the shelf data using findShelfByCode function.
- * If the shelf is found, it updates the shelf data in the database and returns the updated shelf data with HTTP status code 200 (OK).
+ * If the shelf is found and the field(s) that try to update is correct, it updates the shelf data in the database and returns the updated shelf data with HTTP status code 200 (OK).
  * If the shelf is not found, it returns an error message with HTTP status code 401 (Unauthorized).
  * If the shelf code is invalid or missing, it returns an error message with HTTP status code 401 (Unauthorized).
  *
@@ -118,13 +118,32 @@ const getShelfByCode = asyncHandler(async (req, res) => {
  */
 const updateShelfByCode = asyncHandler(async (req, res) => {
     const codShelf = req.params.codShelf
+
+    const validFields = [
+        "_name",
+        "_productCodeList"
+    ];
+
+    let foundValidField = false;
+
+    for (const field of validFields) {
+        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+            foundValidField = true
+            break;
+        }
+    }
+
     if(codShelf){
         const shelf = await findShelfByCode(codShelf)
         if(shelf){
-            const filter = { _codShelf: codShelf }
-            const update = { $set: req.body}
-            const updatedShelf = await updateShelfData(filter, update)
-            res.status(200).json(updatedShelf)
+            if(!foundValidField){
+                res.status(401).json({message: 'Shelf does not contain any of the specified fields.'})
+            } else {
+                const filter = { _codShelf: codShelf }
+                const update = { $set: req.body}
+                const updatedShelf = await updateShelfData(filter, update)
+                res.status(200).json(updatedShelf)
+            }
         } else{
             res.status(401).json({message: 'Shelf not found'})
         }
@@ -149,6 +168,7 @@ const updateShelfByCode = asyncHandler(async (req, res) => {
  */
 const deleteShelfByCode = asyncHandler(async (req, res) => {
     const codShelf = req.params.codShelf
+
     if(codShelf){
         const shelf = await findShelfByCode(codShelf)
         if(shelf){

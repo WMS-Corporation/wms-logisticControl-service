@@ -1,6 +1,7 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
 const {generateCorridor, getAllCorridors, getCorridorByCode, updateCorridorByCode, deleteCorridorByCode} = require("../../src/services/corridorService");
+const {updateShelfByCode} = require("../../src/services/shelfService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -167,6 +168,20 @@ const corridorService = () => describe('Corridor testing', () => {
         await updateCorridorByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid corridor data"})
+    })
+
+    it('it should return 401 if try to updating field that is not specified for the corridor ', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codCorridor: "002023"
+            }, body:{
+                _names: "storage 1"
+            }
+        };
+        await updateCorridorByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Corridor does not contain any of the specified fields."})
     })
 
     it('it should return 200 and the code of the corridor that has been deleted', async () => {

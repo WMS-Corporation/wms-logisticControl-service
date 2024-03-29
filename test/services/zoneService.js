@@ -139,7 +139,7 @@ const zoneService = () => describe('Zone testing', () => {
                 codZone: "096523"
             },
             body:{
-                _name: "zone 1"
+                _temperature: 25
             }
         };
 
@@ -175,6 +175,20 @@ const zoneService = () => describe('Zone testing', () => {
         await updateZoneByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid zone data"})
+    })
+
+    it('it should return 401 if try to updating field that is not specified for the zone ', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codZone: "096523"
+            }, body:{
+                _name: "zone 1"
+            }
+        };
+        await updateZoneByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "Zone does not contain any of the specified fields."})
     })
 
     it('it should return 200 and the code of the zone that has been deleted', async () => {

@@ -108,7 +108,7 @@ const getCorridorByCode = asyncHandler(async (req, res) => {
  * This function updates the corridor data based on the provided corridor code.
  * It extracts the corridor code from the request parameters.
  * If the corridor code is provided, it retrieves the corridor data using findCorridorByCode function.
- * If the corridor is found, it updates the corridor data in the database and returns the updated corridor data with HTTP status code 200 (OK).
+ * If the corridor is found and the field(s) that try to update is correct, it updates the corridor data in the database and returns the updated corridor data with HTTP status code 200 (OK).
  * If the corridor is not found, it returns an error message with HTTP status code 401 (Unauthorized).
  * If the corridor code is invalid or missing, it returns an error message with HTTP status code 401 (Unauthorized).
  *
@@ -118,13 +118,32 @@ const getCorridorByCode = asyncHandler(async (req, res) => {
  */
 const updateCorridorByCode = asyncHandler(async (req, res) => {
     const codCorridor = req.params.codCorridor
+
+    const validFields = [
+        "_name",
+        "_shelfCodeList"
+    ];
+
+    let foundValidField = false;
+
+    for (const field of validFields) {
+        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+            foundValidField = true
+            break;
+        }
+    }
+
     if(codCorridor){
         const corridor = await findCorridorByCode(codCorridor)
         if(corridor){
-            const filter = { _codCorridor: codCorridor }
-            const update = { $set: req.body}
-            const updatedCorridor = await updateCorridorData(filter, update)
-            res.status(200).json(updatedCorridor)
+            if(!foundValidField){
+                res.status(401).json({message: 'Corridor does not contain any of the specified fields.'})
+            } else {
+                const filter = { _codCorridor: codCorridor }
+                const update = { $set: req.body}
+                const updatedCorridor = await updateCorridorData(filter, update)
+                res.status(200).json(updatedCorridor)
+            }
         } else{
             res.status(401).json({message: 'Corridor not found'})
         }

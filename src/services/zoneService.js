@@ -107,7 +107,7 @@ const getZoneByCode = asyncHandler(async (req, res) => {
  * This function updates the zone data based on the provided zone code.
  * It extracts the zone code from the request parameters.
  * If the zone code is provided, it retrieves the zone data using findZoneByCode function.
- * If the zone is found, it updates the zone data in the database and returns the updated zone data with HTTP status code 200 (OK).
+ * If the zone is found and the field(s) that try to update is correct, it updates the zone data in the database and returns the updated zone data with HTTP status code 200 (OK).
  * If the zone is not found, it returns an error message with HTTP status code 401 (Unauthorized).
  * If the zone code is invalid or missing, it returns an error message with HTTP status code 401 (Unauthorized).
  *
@@ -117,13 +117,34 @@ const getZoneByCode = asyncHandler(async (req, res) => {
  */
 const updateZoneByCode = asyncHandler(async (req, res) => {
     const codZone = req.params.codZone
+
+    const validFields = [
+        "_temperature",
+        "_coolingSystemStatus",
+        "_humidityLevel",
+        "_corridorCodeList"
+    ];
+
+    let foundValidField = false;
+
+    for (const field of validFields) {
+        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+            foundValidField = true
+            break;
+        }
+    }
+
     if(codZone){
         const zone = await findZoneByCode(codZone)
         if(zone){
-            const filter = { _codZone: codZone }
-            const update = { $set: req.body}
-            const updatedZone = await updateZoneData(filter, update)
-            res.status(200).json(updatedZone)
+            if(!foundValidField){
+                res.status(401).json({message: 'Zone does not contain any of the specified fields.'})
+            } else {
+                const filter = { _codZone: codZone }
+                const update = { $set: req.body}
+                const updatedZone = await updateZoneData(filter, update)
+                res.status(200).json(updatedZone)
+            }
         } else{
             res.status(401).json({message: 'Zone not found'})
         }
