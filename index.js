@@ -8,7 +8,7 @@ const router = require('./src/routes/route')
 * */
 const logisticControlServicePort = process.env.PORT || 4005;
 let corsOptions = {
-    origin: new RegExp(`http:\/\/localhost:${logisticControlServicePort}\/.*`),
+    origin: new RegExp(`http:\/\/wms-logistic:${logisticControlServicePort}\/.*`),
 };
 dotenv.config();
 const app = express();
