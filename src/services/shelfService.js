@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const {createShelfFromData} = require("../factories/shelfFactory");
 const {findCorridorByCode, updateCorridorData, getCorridors} = require("../repositories/corridorRepository");
 const {generateUniqueCode} = require("../repositories/storageRepository");
-const {createShelf, getShelfsByCorridorCode, findShelfByCode, updateShelfData, deleteShelf} = require("../repositories/shelfRepository");
+const {createShelf, getShelfsByCorridorCode, findShelfByCode, updateShelfData, deleteShelf, getShelf} = require("../repositories/shelfRepository");
 
 /**
  * Generate a new shelf.
@@ -18,9 +18,24 @@ const {createShelf, getShelfsByCorridorCode, findShelfByCode, updateShelfData, d
  * @returns {Object} The HTTP response with the shelf created.
  */
 const generateShelf = asyncHandler(async(req, res) => {
-    const shelf = createShelfFromData(req.body)
-    if(!shelf.name || !shelf.productCodeList){
-        return res.status(401).json({ message: 'Invalid shelf data' })
+    let shelf
+
+    if(verifyBodyFields(req.body, "Create", shelfValidFields, productValidFields)){
+        shelf = createShelfFromData(req.body)
+    } else {
+        return res.status(401).json({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.' })
+    }
+
+    if(!shelf.name){
+        return res.status(401).json({ message: 'Invalid shelf name' })
+    }
+
+    if(!shelf.productList){
+        shelf.productList = []
+    } else {
+        if(!Array.isArray(shelf.productList) && shelf.productList.every(item => typeof item === 'object' && item !== null)){
+            return res.status(401).json({ message: 'Invalid format of product list' })
+        }
     }
 
     const corridorCode = req.params.codCorridor
@@ -119,37 +134,28 @@ const getShelfByCode = asyncHandler(async (req, res) => {
 const updateShelfByCode = asyncHandler(async (req, res) => {
     const codShelf = req.params.codShelf
 
-    const validFields = [
-        "_name",
-        "_productCodeList"
-    ];
-
-    let foundValidField = false;
-
-    for (const field of validFields) {
-        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
-            foundValidField = true
-            break;
-        }
-    }
-
-    if(codShelf){
-        const shelf = await findShelfByCode(codShelf)
-        if(shelf){
-            if(!foundValidField){
-                res.status(401).json({message: 'Shelf does not contain any of the specified fields.'})
-            } else {
+    if(!verifyBodyFields(req.body, "Update", shelfValidFields, productValidFields)){
+        res.status(401).json({message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+    } else {
+        if(codShelf){
+            const shelf = await findShelfByCode(codShelf)
+            if(shelf){
+                const updateData = handleUpdateData(req.body, shelf)
+                if(!updateData){
+                    res.status(401).json({message: 'The products specified in the request body does not exist in the shelf\'s product list.'})
+                    return
+                }
                 const filter = { _codShelf: codShelf }
-                const update = { $set: req.body}
-                const updatedShelf = await updateShelfData(filter, update)
+                const updatedShelf = await updateShelfData(filter, updateData)
                 res.status(200).json(updatedShelf)
+            } else{
+                res.status(401).json({message: 'Shelf not found'})
             }
-        } else{
-            res.status(401).json({message: 'Shelf not found'})
+        }else{
+            res.status(401).json({message:'Invalid shelf data'})
         }
-    }else{
-        res.status(401).json({message:'Invalid shelf data'})
     }
+
 })
 
 /**
@@ -193,10 +199,149 @@ const deleteShelfByCode = asyncHandler(async (req, res) => {
     }
 })
 
+/**
+ * Function to verify the fields in the request body based on the operation type.
+ *
+ * @param {Object} body - The request body to be verified.
+ * @param {string} operation - The type of operation (e.g., "Create" or "Update").
+ * @param {Array} validFields - The array of valid fields for the main entity.
+ * @param {Array} subEntityValidFields - The array of valid fields for sub-entities.
+ * @return {boolean} - Indicates whether the fields in the body are valid for the specified operation.
+ **/
+const verifyBodyFields = (body, operation, validFields, subEntityValidFields) => {
+
+    const validateFields = (fields, body, requireAll) => {
+        const presentFields = Object.keys(body);
+        const missingFields = fields.filter(field => !presentFields.includes(field));
+
+        if (requireAll) {
+            return missingFields.length === 0 && presentFields.length === fields.length;
+        } else {
+            return presentFields.every(field => fields.includes(field));
+        }
+    };
+
+    const isArrayOfJSON = Object.values(body).some(value => Array.isArray(value) &&
+        value.every(item => typeof item === 'object' && item !== null))
+
+    if (operation === "Create") {
+        return validateFields(validFields, body, true) &&
+            (!isArrayOfJSON || Object.values(body).some(value => Array.isArray(value) &&
+                value.every(item => validateFields(subEntityValidFields, item, true))))
+    } else {
+        return validateFields(validFields, body) &&
+            (!isArrayOfJSON || Object.values(body).some(value => Array.isArray(value) &&
+                value.every(item => (validateFields(subEntityValidFields, item)) && item._codProduct)));
+    }
+
+}
+
+/**
+ * Function to handle updating shelf data based on the provided body and existing shelf.
+ *
+ * @param {Object} body - The body containing the update data.
+ * @param {Object} shelf - The existing shelf data.
+ * @return {Object|null} - The update object or null if any product to be updated does not exist.
+ **/
+const handleUpdateData = (body, shelf) => {
+    if (body._productList) {
+        const shelfProductList = shelf._productList
+        const productListToUpdate  = body._productList
+
+        const allProductsExist   = productListToUpdate.every(productToUpdate =>
+            shelfProductList.some(shelfProduct => shelfProduct._codProduct === productToUpdate._codProduct)
+        );
+
+        if (allProductsExist) {
+            const update = { $set: {} };
+            Object.keys(body).forEach(key => {
+                if (key !== '_productList') {
+                    update.$set[key] = body[key];
+                }
+
+            });
+
+            productListToUpdate.forEach(productToUpdate => {
+                shelfProductList.forEach(product => {
+                    if(product._codProduct === productToUpdate._codProduct){
+                        Object.keys(productToUpdate).forEach(field => {
+                            product[field] = productToUpdate[field]
+                        });
+                    }
+                })
+            })
+
+            update.$set["_productList"] = shelfProductList;
+            return update;
+        } else {
+            return null;
+        }
+    } else {
+        const update = { $set: body };
+        return update;
+    }
+}
+
+/**
+ * Handles the transfer of products between shelves.
+ * Retrieves the list of products to transfer from the request body,
+ * fetches the list of all shelves, and iterates through each transfer operation.
+ * For each transfer, it updates the stock of the products on the shelves
+ * and updates the shelf data in the database accordingly.
+ * Finally, it responds with an array of products that have been updated after the transfer operation.
+ *
+ * @param {Object} req - The request object containing the list of products to transfer.
+ * @param {Object} res - The response object to send back the updated products.
+ * @returns {Object} An array of products that have been updated after the transfer operation.
+ */
+const productTransfer = asyncHandler(async (req, res) => {
+    const productsToTransfer = req.body._productList
+    const shelf = await getShelf()
+    const update = { $set: {} }
+    const productsUpdated = []
+
+    for (const transfer of productsToTransfer) {
+        const fromShelf = shelf.find(s => s._codShelf === transfer._from);
+        const toShelf = shelf.find(s => s._codShelf === transfer._to);
+
+        if (fromShelf) {
+            const productFromShelf = fromShelf._productList.find(product => product._codProduct === transfer._codProduct);
+            productFromShelf._stock -= transfer._quantity;
+            productsUpdated.push(productFromShelf)
+            const filter = { _codShelf: fromShelf._codShelf }
+            update.$set["_productList"] = fromShelf._productList
+            await updateShelfData(filter, update)
+        }
+
+        if (toShelf) {
+            const productToShelf = toShelf._productList.find(product => product._codProduct === transfer._codProduct);
+            productToShelf._stock += transfer._quantity;
+            productsUpdated.push(productToShelf)
+            const filter = { _codShelf: toShelf._codShelf }
+            update.$set["_productList"] = toShelf._productList
+            await updateShelfData(filter, update)
+        }
+    }
+
+    res.status(200).json(productsUpdated)
+})
+
+const shelfValidFields = [
+    "_name",
+    "_productList"
+];
+
+const productValidFields = [
+    "_codProduct",
+    "_stock"
+];
+
 module.exports = {
     generateShelf,
     getAllShelfs,
     getShelfByCode,
     updateShelfByCode,
-    deleteShelfByCode
+    deleteShelfByCode,
+    verifyBodyFields,
+    productTransfer
 }

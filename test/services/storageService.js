@@ -1,7 +1,6 @@
 const dotenv = require('dotenv')
 const {generateStorage, getAll, getStorageByCode, updateStorageByCode, deleteStorageByCode} = require("../../src/services/storageService");
 const {describe, beforeEach, it, expect} = require('@jest/globals')
-const {updateZoneByCode} = require("../../src/services/zoneService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -22,6 +21,20 @@ const storageService = () => describe('Storage testing', () => {
         req.user = ""
         req.params = ""
     })
+
+    it('it should return 401 if the body data are invalid', async () => {
+        const res = mockResponse()
+        req.params = { codZone: "096723"}
+        req.body = {
+            _names : "",
+            _zoneCodeList : ["001023"]
+        }
+
+        await generateStorage(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+    });
 
     it('it should return 401 if the data are invalid', async () => {
         const res = mockResponse()
@@ -104,7 +117,7 @@ const storageService = () => describe('Storage testing', () => {
             params: {
                 codStorage: "000877"
             }, body:{
-                _name: "storage 1"
+                _zoneCodeList: ["098764", "123457"]
             }
         };
 
@@ -119,7 +132,7 @@ const storageService = () => describe('Storage testing', () => {
             params: {
                 codStorage: ""
             }, body:{
-                _name: "storage 1"
+                _zoneCodeList: ["098764", "123457"]
             }
         };
         await updateStorageByCode(req, res)
@@ -138,7 +151,7 @@ const storageService = () => describe('Storage testing', () => {
         };
         await updateStorageByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
-        expect(res.json).toHaveBeenCalledWith({message: "Storage does not contain any of the specified fields."})
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid request body. Please ensure all required fields are included and in the correct format."})
     })
 
     it('it should return 200 and the code of the storage that has been deleted', async () => {

@@ -22,6 +22,22 @@ const zoneService = () => describe('Zone testing', () => {
         req.params = ""
     })
 
+    it('it should return 401 if the body data are invalid', async () => {
+        const res = mockResponse()
+        req.params = { codZone: "096723"}
+        req.body = {
+            _temperature : 23.5,
+            _coolingSystemStatus : "",
+            _humidityLevel: "",
+            _zoneCodeList : ["001023"]
+        }
+
+        await generateZone(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+    });
+
     it('it should return 401 if the data are invalid', async () => {
         const res = mockResponse()
         req.params = { codStorage: "096523"}
@@ -154,7 +170,7 @@ const zoneService = () => describe('Zone testing', () => {
             params: {
                 codZone: "0001877"
             }, body:{
-                _name: "zone 1"
+                _temperature: 25
             }
         };
 
@@ -169,7 +185,7 @@ const zoneService = () => describe('Zone testing', () => {
             params: {
                 codZone: ""
             }, body:{
-                _name: "zone 1"
+                _temperature: 25
             }
         };
         await updateZoneByCode(req, res)
@@ -188,7 +204,7 @@ const zoneService = () => describe('Zone testing', () => {
         };
         await updateZoneByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
-        expect(res.json).toHaveBeenCalledWith({message: "Zone does not contain any of the specified fields."})
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid request body. Please ensure all required fields are included and in the correct format."})
     })
 
     it('it should return 200 and the code of the zone that has been deleted', async () => {

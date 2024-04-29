@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const {createStorageFromData} = require("../factories/storageFactory");
 const {createStorage, getStorages, findStorageByCode, updateStorageData, deleteStorage, generateUniqueCode} = require("../repositories/storageRepository");
+const {verifyBodyFields} = require("./shelfService");
 
 /**
  * Generate a new storage.
@@ -15,7 +16,13 @@ const {createStorage, getStorages, findStorageByCode, updateStorageData, deleteS
  * @returns {Object} The HTTP response with the storage created.
  */
 const generateStorage = asyncHandler(async(req, res) => {
-    const storage = createStorageFromData(req.body)
+    let storage
+    if(verifyBodyFields(req.body, "Create", storageValidFields)){
+        storage = createStorageFromData(req.body)
+    } else {
+        return res.status(401).json({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.' })
+    }
+
     if(!storage.zoneCodeList){
         return res.status(401).json({ message: 'Invalid storage data' })
     }
@@ -95,23 +102,18 @@ const getStorageByCode = asyncHandler(async (req, res) => {
 const updateStorageByCode = asyncHandler(async (req, res) => {
     const codStorage = req.params.codStorage
 
-    let foundValidField = false;
-
-    if (Object.prototype.hasOwnProperty.call(req.body, "_zoneCodeList")) {
-        foundValidField = true
+    if(!verifyBodyFields(req.body, "Update", storageValidFields)){
+        res.status(401).json({message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+        return
     }
 
     if(codStorage){
         const storage = await findStorageByCode(codStorage)
         if(storage){
-            if(!foundValidField){
-                res.status(401).json({message: 'Storage does not contain any of the specified fields.'})
-            } else {
-                const filter = { _codStorage: codStorage }
-                const update = { $set: req.body}
-                const updatedOrder = await updateStorageData(filter, update)
-                res.status(200).json(updatedOrder)
-            }
+            const filter = { _codStorage: codStorage }
+            const update = { $set: req.body}
+            const updatedOrder = await updateStorageData(filter, update)
+            res.status(200).json(updatedOrder)
         } else{
             res.status(401).json({message: 'Storage not found'})
         }
@@ -149,6 +151,10 @@ const deleteStorageByCode = asyncHandler(async (req, res) => {
         res.status(401).json({message:'Invalid storage data'})
     }
 })
+
+const storageValidFields = [
+    "_zoneCodeList"
+];
 
 module.exports = {
     generateStorage,

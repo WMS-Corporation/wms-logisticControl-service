@@ -1,7 +1,6 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
-const {generateShelf, getAllShelfs, getShelfByCode, updateShelfByCode, deleteShelfByCode} = require("../../src/services/shelfService");
-const {updateStorageByCode} = require("../../src/services/storageService");
+const {generateShelf, getAllShelfs, getShelfByCode, updateShelfByCode, deleteShelfByCode, productTransfer} = require("../../src/services/shelfService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -27,14 +26,27 @@ const shelfService = () => describe('Shelf testing', () => {
         const res = mockResponse()
         req.params = { codCorridor: "002024"}
         req.body = {
-            _name : "",
-            _productCodeList : ["001013"]
+            _name : ""
         }
 
         await generateShelf(req, res)
 
         expect(res.status).toHaveBeenCalledWith(401)
-        expect(res.json).toHaveBeenCalledWith({ message: 'Invalid shelf data'})
+        expect(res.json).toHaveBeenCalledWith({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+    });
+
+    it('it should return 401 if the name of shelf are invalid', async () => {
+        const res = mockResponse()
+        req.params = { codCorridor: "002024"}
+        req.body = {
+            _name : "",
+            _productList : ["001013"]
+        }
+
+        await generateShelf(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({ message: 'Invalid shelf name'})
     });
 
     it('it should return 401 if creating a new shelf without specified the corridor code', async () => {
@@ -43,7 +55,25 @@ const shelfService = () => describe('Shelf testing', () => {
 
         req.body = {
             _name : "Shelf 4",
-            _productCodeList : ["001013"]
+            _productList : [{
+                "_codProduct": "000234",
+                "_stock": 20
+            }]
+        }
+
+        await generateShelf(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({ message: 'Invalid corridor data'})
+    });
+
+    it('it should return 401 if creating a new shelf without specified the product list', async () => {
+        const res = mockResponse()
+        req.params = { codCorridor: ""}
+
+        req.body = {
+            _name : "Shelf 4",
+            _productList : ["001013"]
         }
 
         await generateShelf(req, res)
@@ -58,7 +88,10 @@ const shelfService = () => describe('Shelf testing', () => {
 
         req.body = {
             _name : "Shelf 4",
-            _productCodeList : ["001013"]
+            _productList :  [{
+                "_codProduct": "000234",
+                "_stock": 20
+            }]
         }
 
         await generateShelf(req, res)
@@ -72,7 +105,10 @@ const shelfService = () => describe('Shelf testing', () => {
         req.params = { codCorridor: "002024"}
         req.body = {
             _name : "Shelf 4",
-            _productCodeList : ["001013"]
+            _productList :  [{
+                "_codProduct": "000234",
+                "_stock": 20
+            }]
         }
 
         await generateShelf(req, res)
@@ -172,6 +208,24 @@ const shelfService = () => describe('Shelf testing', () => {
         expect(res.json).toHaveBeenCalledWith({message: "Invalid shelf data"})
     })
 
+    it('it should return 401 if try to update the stock of a product that is not specified in the shelf', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codShelf: "001023"
+            },
+            body:{
+                _productList :  [{
+                    "_codProduct": "000235",
+                    "_stock": 20
+                }]
+            }
+        };
+        await updateShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({message: "The products specified in the request body does not exist in the shelf\'s product list."})
+    })
+
     it('it should return 401 if try to updating field that is not specified for the shelf ', async () => {
         const res = mockResponse()
         const req = {
@@ -183,7 +237,29 @@ const shelfService = () => describe('Shelf testing', () => {
         };
         await updateShelfByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
-        expect(res.json).toHaveBeenCalledWith({message: "Shelf does not contain any of the specified fields."})
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid request body. Please ensure all required fields are included and in the correct format."})
+    })
+
+    it('it should return 200 if the product transfer operation is completed', async () => {
+        const res = mockResponse()
+        const req = {
+            body:{
+                _productList: [{
+                    "_codProduct" : "000234",
+                    "_from": null,
+                    "_to": "001023",
+                    "_quantity": 5
+                }, {
+                    "_codProduct" : "002123",
+                    "_from": "001025",
+                    "_to": null,
+                    "_quantity": 5
+                }]
+            }
+        };
+        await productTransfer(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
     })
 
     it('it should return 200 and the code of the shelf that has been deleted', async () => {

@@ -17,8 +17,19 @@ const shelfRepository = () => describe('Shelf testing', () => {
 
     it('it should find a shelf by code', async () => {
         const shelf = await findShelfByCode("001023")
-        const productCodeList = ["000234", "000123", "000456"]
-        expect(shelf._productCodeList).toEqual(productCodeList)
+        const productList = [
+            {
+                "_codProduct": "000234",
+                "_stock": 20
+            }, {
+                "_codProduct": "000123",
+                "_stock": 30
+            }, {
+                "_codProduct": "000456",
+                "_stock": 15
+            }
+        ]
+        expect(shelf._productList).toEqual(productList)
     });
 
     it('it should return null if shelf is not found', async () => {

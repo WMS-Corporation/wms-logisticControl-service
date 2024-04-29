@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const {createZoneFromData} = require("../factories/zoneFactory");
 const {findStorageByCode, generateUniqueCode, updateStorageData, getStorages} = require("../repositories/storageRepository");
 const {createZone, getZonesByStorageCode, findZoneByCode, updateZoneData, deleteZone} = require("../repositories/zoneRepository");
+const {verifyBodyFields} = require("./shelfService");
 
 /**
  * Generate a new zone.
@@ -17,7 +18,13 @@ const {createZone, getZonesByStorageCode, findZoneByCode, updateZoneData, delete
  * @returns {Object} The HTTP response with the zone created.
  */
 const generateZone = asyncHandler(async(req, res) => {
-    const zone = createZoneFromData(req.body)
+    let zone
+    if(verifyBodyFields(req.body, "Create", zoneValidFields)){
+        zone = createZoneFromData(req.body)
+    } else {
+        return res.status(401).json({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.' })
+    }
+
     if(!zone.temperature || !zone.humidityLevel || !zone.coolingSystemStatus || !zone.corridorCodeList){
         return res.status(401).json({ message: 'Invalid zone data' })
     }
@@ -118,33 +125,18 @@ const getZoneByCode = asyncHandler(async (req, res) => {
 const updateZoneByCode = asyncHandler(async (req, res) => {
     const codZone = req.params.codZone
 
-    const validFields = [
-        "_temperature",
-        "_coolingSystemStatus",
-        "_humidityLevel",
-        "_corridorCodeList"
-    ];
-
-    let foundValidField = false;
-
-    for (const field of validFields) {
-        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
-            foundValidField = true
-            break;
-        }
+    if(!verifyBodyFields(req.body, "Update", zoneValidFields)){
+        res.status(401).json({message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+        return
     }
 
     if(codZone){
         const zone = await findZoneByCode(codZone)
         if(zone){
-            if(!foundValidField){
-                res.status(401).json({message: 'Zone does not contain any of the specified fields.'})
-            } else {
-                const filter = { _codZone: codZone }
-                const update = { $set: req.body}
-                const updatedZone = await updateZoneData(filter, update)
-                res.status(200).json(updatedZone)
-            }
+            const filter = { _codZone: codZone }
+            const update = { $set: req.body}
+            const updatedZone = await updateZoneData(filter, update)
+            res.status(200).json(updatedZone)
         } else{
             res.status(401).json({message: 'Zone not found'})
         }
@@ -192,6 +184,13 @@ const deleteZoneByCode = asyncHandler(async (req, res) => {
         res.status(401).json({message:'Invalid zone data'})
     }
 })
+
+const zoneValidFields = [
+    "_temperature",
+    "_coolingSystemStatus",
+    "_humidityLevel",
+    "_corridorCodeList"
+];
 
 module.exports = {
     generateZone,

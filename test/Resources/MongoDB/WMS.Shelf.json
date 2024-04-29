@@ -1,12 +1,32 @@
 [
   {
     "_name" : "Shelf 1",
-    "_productCodeList" : ["000234","000123","000456"],
+    "_productList" : [
+      {
+        "_codProduct": "000234",
+        "_stock": 20
+      },{
+        "_codProduct": "000123",
+        "_stock": 30
+      },{
+        "_codProduct": "000456",
+        "_stock": 15
+      }
+    ],
     "_codShelf": "001023"
   },
   {
     "_name" : "Shelf 2",
-    "_productCodeList" : ["001234","002123","003456"],
+    "_productList" : [{
+      "_codProduct": "001234",
+      "_stock": 20
+    },{
+      "_codProduct": "002123",
+      "_stock": 30
+    },{
+      "_codProduct": "003456",
+      "_stock": 15
+    }],
     "_codShelf": "001025"
   }
 ]

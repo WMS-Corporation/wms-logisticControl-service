@@ -3,6 +3,7 @@ const {createCorridorFromData} = require("../factories/corridorFactory");
 const {findZoneByCode, updateZoneData, getZones} = require("../repositories/zoneRepository");
 const {generateUniqueCode} = require("../repositories/storageRepository");
 const {createCorridor, getCorridorsByZoneCode, findCorridorByCode, updateCorridorData, deleteCorridor} = require("../repositories/corridorRepository");
+const {verifyBodyFields} = require("./shelfService");
 
 /**
  * Generate a new corridor.
@@ -18,7 +19,12 @@ const {createCorridor, getCorridorsByZoneCode, findCorridorByCode, updateCorrido
  * @returns {Object} The HTTP response with the corridor created.
  */
 const generateCorridor = asyncHandler(async(req, res) => {
-    const corridor = createCorridorFromData(req.body)
+    let corridor
+    if(verifyBodyFields(req.body, "Create", corridorValidFields)){
+        corridor = createCorridorFromData(req.body)
+    } else {
+        return res.status(401).json({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.' })
+    }
     if(!corridor.name || !corridor.shelfCodeList){
         return res.status(401).json({ message: 'Invalid corridor data' })
     }
@@ -119,31 +125,18 @@ const getCorridorByCode = asyncHandler(async (req, res) => {
 const updateCorridorByCode = asyncHandler(async (req, res) => {
     const codCorridor = req.params.codCorridor
 
-    const validFields = [
-        "_name",
-        "_shelfCodeList"
-    ];
-
-    let foundValidField = false;
-
-    for (const field of validFields) {
-        if (Object.prototype.hasOwnProperty.call(req.body, field)) {
-            foundValidField = true
-            break;
-        }
+    if(!verifyBodyFields(req.body, "Update", corridorValidFields)){
+        res.status(401).json({message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+        return
     }
 
     if(codCorridor){
         const corridor = await findCorridorByCode(codCorridor)
         if(corridor){
-            if(!foundValidField){
-                res.status(401).json({message: 'Corridor does not contain any of the specified fields.'})
-            } else {
-                const filter = { _codCorridor: codCorridor }
-                const update = { $set: req.body}
-                const updatedCorridor = await updateCorridorData(filter, update)
-                res.status(200).json(updatedCorridor)
-            }
+            const filter = { _codCorridor: codCorridor }
+            const update = { $set: req.body}
+            const updatedCorridor = await updateCorridorData(filter, update)
+            res.status(200).json(updatedCorridor)
         } else{
             res.status(401).json({message: 'Corridor not found'})
         }
@@ -191,6 +184,11 @@ const deleteCorridorByCode = asyncHandler(async (req, res) => {
         res.status(401).json({message:'Invalid corridor data'})
     }
 })
+
+const corridorValidFields = [
+    "_name",
+    "_shelfCodeList"
+];
 
 module.exports = {
     generateCorridor,

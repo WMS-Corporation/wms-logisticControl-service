@@ -1,7 +1,6 @@
 const dotenv = require('dotenv')
 const {describe, beforeEach, it, expect} = require('@jest/globals')
 const {generateCorridor, getAllCorridors, getCorridorByCode, updateCorridorByCode, deleteCorridorByCode} = require("../../src/services/corridorService");
-const {updateShelfByCode} = require("../../src/services/shelfService");
 dotenv.config()
 const mockResponse = () => {
     const res = {}
@@ -22,6 +21,20 @@ const corridorService = () => describe('Corridor testing', () => {
         req.user = ""
         req.params = ""
     })
+
+    it('it should return 401 if the body data are invalid', async () => {
+        const res = mockResponse()
+        req.params = { codZone: "096723"}
+        req.body = {
+            _names : "",
+            _shelfCodeList : ["001023"]
+        }
+
+        await generateCorridor(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+    });
 
     it('it should return 401 if the data are invalid', async () => {
         const res = mockResponse()
@@ -181,7 +194,7 @@ const corridorService = () => describe('Corridor testing', () => {
         };
         await updateCorridorByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
-        expect(res.json).toHaveBeenCalledWith({message: "Corridor does not contain any of the specified fields."})
+        expect(res.json).toHaveBeenCalledWith({message: "Invalid request body. Please ensure all required fields are included and in the correct format."})
     })
 
     it('it should return 200 and the code of the corridor that has been deleted', async () => {

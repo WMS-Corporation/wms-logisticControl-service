@@ -1,7 +1,7 @@
 class Shelf{
-    constructor(name, productCodeList, codShelf) {
+    constructor(name, productList, codShelf) {
         this._name = name;
-        this._productCodeList = productCodeList;
+        this._productList = productList;
         this._codShelf = codShelf;
     }
 
@@ -13,12 +13,12 @@ class Shelf{
         this._name = value;
     }
 
-    get productCodeList() {
-        return this._productCodeList;
+    get productList() {
+        return this._productList;
     }
 
-    set productCodeList(value) {
-        this._productCodeList = value;
+    set productList(value) {
+        this._productList = value;
     }
 
     get codShelf() {

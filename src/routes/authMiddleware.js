@@ -17,18 +17,17 @@ const dotenv = require('dotenv');
 dotenv.config()
 const verifyToken = asyncHandler(async(req, res, next) => {
     const token = req.headers.authorization;
+
     if(!token){
         return res.status(401).json({message: "Token not provided"});
     }
-
     const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);
     req.user = await collections?.users?.findOne({ _codUser: decoded.id });
     if (!req.user) {
         return res.status(401).json({message: "Invalid token"});
     }
 
-    if (req.method === "POST" || req.method === "PUT" || req.method === "DELETE") {
-        // Controllo del tipo di utente
+    if (req.method === "POST" || (req.method === "PUT" && req.url !== "/shelf/transfer") || req.method === "DELETE") {
         if (req.user._type !== "Admin") {
             return res.status(401).json({ message: "Only admin users can perform this action" });
         }
