@@ -73,13 +73,33 @@ const shelfService = () => describe('Shelf testing', () => {
 
         req.body = {
             _name : "Shelf 4",
-            _productList : ["001013"]
+            _productList : [{
+                "_codProduct": "000234",
+                "_stock": 20
+            }]
         }
 
         await generateShelf(req, res)
 
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({ message: 'Invalid corridor data'})
+    });
+
+    it('it should return 401 if creating a new shelf without specified the correct format of product list', async () => {
+        const res = mockResponse()
+        req.params = { codCorridor: ""}
+
+        req.body = {
+            _name : "Shelf 4",
+            _productList : [
+                 "000234"
+            ]
+        }
+
+        await generateShelf(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(401)
+        expect(res.json).toHaveBeenCalledWith({ message: 'Invalid format of product list'})
     });
 
     it('it should return 401 if creating a new corridor without correct corridor code', async () => {
@@ -177,6 +197,27 @@ const shelfService = () => describe('Shelf testing', () => {
         expect(res.json).not.toBeNull()
     })
 
+    it('it should return 200 and the shelf updated with a new product list', async () => {
+        const res = mockResponse()
+        const req = {
+            params: {
+                codShelf: "001023"
+            },
+            body:{
+                _productList: [
+                    {
+                        _codProduct: "001103",
+                        _stock: 12
+                    }
+                ]
+            }
+        };
+
+        await updateShelfByCode(req, res)
+        expect(res.status).toHaveBeenCalledWith(200)
+        expect(res.json).not.toBeNull()
+    })
+
     it('it should return 401 if updating shelf data without correct shelf code', async () => {
         const res = mockResponse()
         const req = {
@@ -206,24 +247,6 @@ const shelfService = () => describe('Shelf testing', () => {
         await updateShelfByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid shelf data"})
-    })
-
-    it('it should return 401 if try to update the stock of a product that is not specified in the shelf', async () => {
-        const res = mockResponse()
-        const req = {
-            params: {
-                codShelf: "001023"
-            },
-            body:{
-                _productList :  [{
-                    "_codProduct": "000235",
-                    "_stock": 20
-                }]
-            }
-        };
-        await updateShelfByCode(req, res)
-        expect(res.status).toHaveBeenCalledWith(401)
-        expect(res.json).toHaveBeenCalledWith({message: "The products specified in the request body does not exist in the shelf\'s product list."})
     })
 
     it('it should return 401 if try to updating field that is not specified for the shelf ', async () => {

@@ -11,7 +11,7 @@ let client = null;
  *
  * This function establishes a connection to the MongoDB database using the connection string
  * specified in the environment variables. It initializes the MongoDB client, connects to the
- * database, and sets up the users, storage, corridors, shelfs and zones collections for further database operations.
+ * database, and sets up the users, storage, corridors, shelf and zones collections for further database operations.
  */
 async function connectDB(dbName) {
     try {
@@ -42,15 +42,14 @@ async function closeDB() {
     try {
         if (client) {
             await client.close();
-            console.log('Database connection closed successfully.');
+            console.log('Database connection closed successfully.')
         } else {
-            console.warn('No database connection to close.');
+            console.warn('No database connection to close.')
         }
     } catch (error) {
-        console.error('Error while closing database connection: ', error);
+        console.error('Error while closing database connection: ', error)
     }
 }
-
 module.exports = {
     connectDB,
     collections,

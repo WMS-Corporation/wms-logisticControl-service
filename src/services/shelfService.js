@@ -33,7 +33,7 @@ const generateShelf = asyncHandler(async(req, res) => {
     if(!shelf.productList){
         shelf.productList = []
     } else {
-        if(!Array.isArray(shelf.productList) && shelf.productList.every(item => typeof item === 'object' && item !== null)){
+        if(Array.isArray(shelf.productList) && !shelf.productList.every(item => typeof item === 'object' && item !== null)){
             return res.status(401).json({ message: 'Invalid format of product list' })
         }
     }
@@ -141,10 +141,6 @@ const updateShelfByCode = asyncHandler(async (req, res) => {
             const shelf = await findShelfByCode(codShelf)
             if(shelf){
                 const updateData = handleUpdateData(req.body, shelf)
-                if(!updateData){
-                    res.status(401).json({message: 'The products specified in the request body does not exist in the shelf\'s product list.'})
-                    return
-                }
                 const filter = { _codShelf: codShelf }
                 const updatedShelf = await updateShelfData(filter, updateData)
                 res.status(200).json(updatedShelf)
@@ -200,14 +196,18 @@ const deleteShelfByCode = asyncHandler(async (req, res) => {
 })
 
 /**
- * Function to verify the fields in the request body based on the operation type.
+ * Verifies the fields in the request body based on the operation type and the valid fields for the main entity and sub-entities.
+ *
+ * This function checks whether the fields in the request body are valid for the specified operation type ("Create" or "Update").
+ * It validates the presence and correctness of required fields for the main entity and its sub-entities.
+ * Returns true if all fields are valid; otherwise, returns false.
  *
  * @param {Object} body - The request body to be verified.
  * @param {string} operation - The type of operation (e.g., "Create" or "Update").
  * @param {Array} validFields - The array of valid fields for the main entity.
  * @param {Array} subEntityValidFields - The array of valid fields for sub-entities.
  * @return {boolean} - Indicates whether the fields in the body are valid for the specified operation.
- **/
+ */
 const verifyBodyFields = (body, operation, validFields, subEntityValidFields) => {
 
     const validateFields = (fields, body, requireAll) => {
@@ -217,7 +217,10 @@ const verifyBodyFields = (body, operation, validFields, subEntityValidFields) =>
         if (requireAll) {
             return missingFields.length === 0 && presentFields.length === fields.length;
         } else {
-            return presentFields.every(field => fields.includes(field));
+            if(presentFields.length === 1 && presentFields[0] === "_codProduct")
+                return false
+            else
+                return presentFields.every(field => fields.includes(field));
         }
     };
 
@@ -239,46 +242,42 @@ const verifyBodyFields = (body, operation, validFields, subEntityValidFields) =>
 /**
  * Function to handle updating shelf data based on the provided body and existing shelf.
  *
+ * This function takes the update data from the request body and the existing shelf data.
+ * If product list is provided, it iterates through the products in the update data and updates the corresponding products in the existing shelf.
+ * If a product to be updated does not exist in the existing shelf, it adds the new product to the shelf.
+ * The updated shelf data, including the modified product list, is returned.
+ * If no product list is provided in the update data, the entire body is treated as the update, excluding the product list.
+ *
  * @param {Object} body - The body containing the update data.
  * @param {Object} shelf - The existing shelf data.
  * @return {Object|null} - The update object or null if any product to be updated does not exist.
  **/
 const handleUpdateData = (body, shelf) => {
     if (body._productList) {
-        const shelfProductList = shelf._productList
+        const shelfProductMap = new Map(shelf._productList.map((product) => [product._codProduct, product]))
         const productListToUpdate  = body._productList
 
-        const allProductsExist   = productListToUpdate.every(productToUpdate =>
-            shelfProductList.some(shelfProduct => shelfProduct._codProduct === productToUpdate._codProduct)
-        );
+        const update = { $set: {} };
+        Object.keys(body).forEach(key => {
+            if (key !== '_productList') {
+                update.$set[key] = body[key];
+            }
+        });
 
-        if (allProductsExist) {
-            const update = { $set: {} };
-            Object.keys(body).forEach(key => {
-                if (key !== '_productList') {
-                    update.$set[key] = body[key];
-                }
-
-            });
-
-            productListToUpdate.forEach(productToUpdate => {
-                shelfProductList.forEach(product => {
-                    if(product._codProduct === productToUpdate._codProduct){
-                        Object.keys(productToUpdate).forEach(field => {
-                            product[field] = productToUpdate[field]
-                        });
-                    }
-                })
-            })
-
-            update.$set["_productList"] = shelfProductList;
-            return update;
-        } else {
-            return null;
-        }
-    } else {
-        const update = { $set: body };
+        productListToUpdate.forEach(productToUpdate => {
+            let product = shelfProductMap.get(productToUpdate._codProduct)
+            if(product){
+                Object.keys(productToUpdate).forEach(field => {
+                    product[field] = productToUpdate[field]
+                });
+            } else {
+                shelfProductMap.set(productToUpdate._codProduct, productToUpdate)
+            }
+        })
+        update.$set["_productList"] = Array.from(shelfProductMap.values())
         return update;
+    } else {
+        return  { $set: body }
     }
 }
 
@@ -315,7 +314,15 @@ const productTransfer = asyncHandler(async (req, res) => {
 
         if (toShelf) {
             const productToShelf = toShelf._productList.find(product => product._codProduct === transfer._codProduct);
-            productToShelf._stock += transfer._quantity;
+            if(productToShelf){
+                productToShelf._stock += transfer._quantity;
+            } else {
+                toShelf._productList.push({
+                    _codProduct: transfer._codProduct,
+                    _stock: transfer._quantity
+                })
+            }
+
             productsUpdated.push(productToShelf)
             const filter = { _codShelf: toShelf._codShelf }
             update.$set["_productList"] = toShelf._productList
