@@ -11,8 +11,20 @@ const mockResponse = () => {
 const req = {
     body : "",
     user : "",
-    params: ""
+    params: "",
+    headers: {
+        authorization: 'Bearer some-token'
+    }
 }
+const mockFetch = jest.fn().mockImplementation(async (url, requestOptions) => {
+    const defaultResponse = {
+        ok: true,
+        json: async () => ({ someData: 'someValue' })
+    }
+
+    return Promise.resolve(defaultResponse);
+})
+global.fetch = mockFetch
 
 const shelfService = () => describe('Shelf testing', () => {
 
@@ -120,6 +132,27 @@ const shelfService = () => describe('Shelf testing', () => {
         expect(res.json).toHaveBeenCalledWith({ message: 'Corridor not found'})
     });
 
+    it('it should return 401 if the product is not defined', async () => {
+        const res = mockResponse()
+        req.params = { codCorridor: "002024"}
+        req.body = {
+            _name : "Shelf 4",
+            _productList :  [{
+                "_codProduct": "000234",
+                "_stock": 20
+            }]
+        }
+
+        mockFetch.mockResolvedValueOnce({
+            ok: false,
+            status: 401
+        });
+        await generateShelf(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Product not defined.' });
+    });
+
     it('it should return 200 if the shelf generation is successful', async () => {
         const res = mockResponse()
         req.params = { codCorridor: "002024"}
@@ -183,14 +216,8 @@ const shelfService = () => describe('Shelf testing', () => {
 
     it('it should return 200 and the shelf updated with a new data', async () => {
         const res = mockResponse()
-        const req = {
-            params: {
-                codShelf: "001023"
-            },
-            body:{
-                _name: "Shelf 3"
-            }
-        };
+        req.params = { codShelf: "001023" }
+        req.body = {_name: "Shelf 3"}
 
         await updateShelfByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(200)
@@ -199,19 +226,13 @@ const shelfService = () => describe('Shelf testing', () => {
 
     it('it should return 200 and the shelf updated with a new product list', async () => {
         const res = mockResponse()
-        const req = {
-            params: {
-                codShelf: "001023"
-            },
-            body:{
-                _productList: [
-                    {
-                        _codProduct: "001103",
-                        _stock: 12
-                    }
-                ]
-            }
-        };
+        req.params = { codShelf: "001023" }
+        req.body = {_productList: [
+                {
+                    _codProduct: "001103",
+                    _stock: 12
+                }
+            ]}
 
         await updateShelfByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(200)
@@ -262,6 +283,27 @@ const shelfService = () => describe('Shelf testing', () => {
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid request body. Please ensure all required fields are included and in the correct format."})
     })
+
+    it('it should return 401 if try to updating shelf data with a new product that is not defined', async () => {
+        const res = mockResponse()
+        req.params = { codCorridor: "002024"}
+        req.body = {
+            _name : "Shelf 4",
+            _productList :  [{
+                "_codProduct": "000334",
+                "_stock": 20
+            }]
+        }
+
+        mockFetch.mockResolvedValueOnce({
+            ok: false,
+            status: 401
+        });
+        await updateShelfByCode(req, res)
+
+        expect(res.status).toHaveBeenCalledWith(401);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Product not defined.' });
+    });
 
     it('it should return 200 if the product transfer operation is completed', async () => {
         const res = mockResponse()

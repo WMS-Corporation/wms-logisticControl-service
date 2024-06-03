@@ -36,6 +36,13 @@ const generateShelf = asyncHandler(async(req, res) => {
         if(Array.isArray(shelf.productList) && !shelf.productList.every(item => typeof item === 'object' && item !== null)){
             return res.status(401).json({ message: 'Invalid format of product list' })
         }
+
+        for(let product of shelf.productList){
+            let responseProductService = await fetchData('http://localhost:4002/' + product._codProduct, req)
+            if(responseProductService.status === 401){
+                return res.status(401).json({ message: 'Product not defined.' })
+            }
+        }
     }
 
     const corridorCode = req.params.codCorridor
@@ -135,21 +142,30 @@ const updateShelfByCode = asyncHandler(async (req, res) => {
     const codShelf = req.params.codShelf
 
     if(!verifyBodyFields(req.body, "Update", shelfValidFields, productValidFields)){
-        res.status(401).json({message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
-    } else {
-        if(codShelf){
-            const shelf = await findShelfByCode(codShelf)
-            if(shelf){
-                const update = { $set: req.body }
-                const filter = { _codShelf: codShelf }
-                const updatedShelf = await updateShelfData(filter, update)
-                res.status(200).json(updatedShelf)
-            } else{
-                res.status(401).json({message: 'Shelf not found'})
+        return res.status(401).json({message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+    }
+
+    if(req.body._productList){
+        for(let product of req.body._productList){
+            let responseProductService = await fetchData('http://localhost:4002/' + product._codProduct, req)
+            if(responseProductService.status === 401){
+                return res.status(401).json({ message: 'Product not defined.' })
             }
-        }else{
-            res.status(401).json({message:'Invalid shelf data'})
         }
+    }
+
+    if(codShelf){
+        const shelf = await findShelfByCode(codShelf)
+        if(shelf){
+            const update = { $set: req.body }
+            const filter = { _codShelf: codShelf }
+            const updatedShelf = await updateShelfData(filter, update)
+            return res.status(200).json(updatedShelf)
+        } else{
+            return res.status(401).json({message: 'Shelf not found'})
+        }
+    }else{
+        return res.status(401).json({message:'Invalid shelf data'})
     }
 
 })
@@ -291,6 +307,37 @@ const productTransfer = asyncHandler(async (req, res) => {
     res.status(200).json(productsUpdated)
 })
 
+/**
+ * Fetches data from the specified URL using the provided request options.
+ *
+ * @param {string} url - The URL to fetch data from.
+ * @param {Object} req - The request object containing headers and user information.
+ * @returns {Promise<Object>} A promise that resolves to an object containing the status and data.
+ *                           - { status: 200, data } if the request is successful.
+ *                           - { status: 401 } if the response is not OK.
+ *                           - { status: 500 } if there is an error during the request.
+ */
+const fetchData = async (url, req) => {
+    let authorization = req.headers.authorization
+    const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', 'Authorization': authorization},
+        user: req.user
+    }
+
+    try {
+        const response = await fetch(url, requestOptions)
+        if (!response.ok) {
+            return { status: 401 }
+        }
+        const data = await response.json()
+        return { status: 200, data }
+    } catch (error) {
+        console.error('Error during the request:', error)
+        return { status: 500 }
+    }
+}
+
 const shelfValidFields = [
     "_name",
     "_productList"
@@ -308,5 +355,6 @@ module.exports = {
     updateShelfByCode,
     deleteShelfByCode,
     verifyBodyFields,
-    productTransfer
+    productTransfer,
+    fetchData
 }
