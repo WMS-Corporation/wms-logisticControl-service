@@ -22,7 +22,7 @@ const generateZone = asyncHandler(async(req, res) => {
     if(verifyBodyFields(req.body, "Create", zoneValidFields)){
         zone = createZoneFromData(req.body)
     } else {
-        return res.status(401).json({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.' })
+        return res.status(401).json({ message: 'Please ensure all required fields are included and in the correct format.' })
     }
 
     if(!zone.temperature || !zone.humidityLevel || !zone.coolingSystemStatus || !zone.corridorCodeList){
@@ -126,7 +126,7 @@ const updateZoneByCode = asyncHandler(async (req, res) => {
     const codZone = req.params.codZone
 
     if(!verifyBodyFields(req.body, "Update", zoneValidFields)){
-        res.status(401).json({message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+        res.status(401).json({message: 'Please ensure all required fields are included and in the correct format.'})
         return
     }
 

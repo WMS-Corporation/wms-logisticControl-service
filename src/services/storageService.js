@@ -20,7 +20,7 @@ const generateStorage = asyncHandler(async(req, res) => {
     if(verifyBodyFields(req.body, "Create", storageValidFields)){
         storage = createStorageFromData(req.body)
     } else {
-        return res.status(401).json({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.' })
+        return res.status(401).json({ message: 'Please ensure all required fields are included and in the correct format.' })
     }
 
     if(!storage.zoneCodeList){
@@ -103,7 +103,7 @@ const updateStorageByCode = asyncHandler(async (req, res) => {
     const codStorage = req.params.codStorage
 
     if(!verifyBodyFields(req.body, "Update", storageValidFields)){
-        res.status(401).json({message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+        res.status(401).json({message: 'Please ensure all required fields are included and in the correct format.'})
         return
     }
 

@@ -44,7 +44,7 @@ const shelfService = () => describe('Shelf testing', () => {
         await generateShelf(req, res)
 
         expect(res.status).toHaveBeenCalledWith(401)
-        expect(res.json).toHaveBeenCalledWith({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+        expect(res.json).toHaveBeenCalledWith({ message: 'Please ensure all required fields are included and in the correct format.'})
     });
 
     it('it should return 401 if the name of shelf are invalid', async () => {
@@ -281,7 +281,7 @@ const shelfService = () => describe('Shelf testing', () => {
         };
         await updateShelfByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
-        expect(res.json).toHaveBeenCalledWith({message: "Invalid request body. Please ensure all required fields are included and in the correct format."})
+        expect(res.json).toHaveBeenCalledWith({message: "Please ensure all required fields are included and in the correct format."})
     })
 
     it('it should return 401 if try to updating shelf data with a new product that is not defined', async () => {

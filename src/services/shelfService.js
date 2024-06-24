@@ -23,7 +23,7 @@ const generateShelf = asyncHandler(async(req, res) => {
     if(verifyBodyFields(req.body, "Create", shelfValidFields, productValidFields)){
         shelf = createShelfFromData(req.body)
     } else {
-        return res.status(401).json({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.' })
+        return res.status(401).json({ message: 'Please ensure all required fields are included and in the correct format.' })
     }
 
     if(!shelf.name){
@@ -65,6 +65,48 @@ const generateShelf = asyncHandler(async(req, res) => {
         }
     }else{
         res.status(401).json({message:'Invalid corridor data'})
+    }
+
+})
+
+const addProductToShelf = asyncHandler(async(req, res) => {
+    let productInShelf = req.body;
+    if(productInShelf._codProduct === undefined || productInShelf._stock === undefined){
+        return res.status(401).json({ message: 'Please ensure all required fields are included and in the correct format.' })
+    }
+
+    let responseProductService = await fetchData('http://localhost:4002/' + productInShelf._codProduct, req)
+    if(responseProductService.status === 401){
+        return res.status(401).json({ message: 'Product not defined.' })
+    }
+
+    const shelf = await findShelfByCode(req.params.codShelf)
+    if (!shelf) {
+        return res.status(404).json({ message: 'Shelf not found.' });
+    }
+
+    let existingProduct = null
+    if(shelf._productList.length > 0){
+        existingProduct = shelf._productList.find(product => product._codProduct === productInShelf._codProduct);
+    }
+
+    if (existingProduct) {
+        existingProduct._stock += productInShelf._stock;
+    } else {
+        shelf._productList.push({
+            _codProduct: productInShelf._codProduct,
+            _stock: productInShelf._stock
+        });
+    }
+    const filter = { _codShelf: req.params.codShelf };
+    const update = { $set: { _productList: shelf._productList } };
+
+    let updatedShelfList = await updateShelfData(filter, update)
+    if(updatedShelfList){
+        console.log(updatedShelfList)
+        return res.status(200).json({ message: 'Add product to shelf', product: productInShelf})
+    }else{
+        return res.status(401).json({ message: 'Invalid shelf data' })
     }
 
 })
@@ -142,7 +184,7 @@ const updateShelfByCode = asyncHandler(async (req, res) => {
     const codShelf = req.params.codShelf
 
     if(!verifyBodyFields(req.body, "Update", shelfValidFields, productValidFields)){
-        return res.status(401).json({message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+        return res.status(401).json({message: 'Please ensure all required fields are included and in the correct format.'})
     }
 
     if(req.body._productList){
@@ -356,5 +398,6 @@ module.exports = {
     deleteShelfByCode,
     verifyBodyFields,
     productTransfer,
-    fetchData
+    fetchData,
+    addProductToShelf
 }

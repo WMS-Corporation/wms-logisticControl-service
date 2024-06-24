@@ -23,7 +23,7 @@ const generateCorridor = asyncHandler(async(req, res) => {
     if(verifyBodyFields(req.body, "Create", corridorValidFields)){
         corridor = createCorridorFromData(req.body)
     } else {
-        return res.status(401).json({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.' })
+        return res.status(401).json({ message: 'Please ensure all required fields are included and in the correct format.' })
     }
     if(!corridor.name || !corridor.shelfCodeList){
         return res.status(401).json({ message: 'Invalid corridor data' })
@@ -126,7 +126,7 @@ const updateCorridorByCode = asyncHandler(async (req, res) => {
     const codCorridor = req.params.codCorridor
 
     if(!verifyBodyFields(req.body, "Update", corridorValidFields)){
-        res.status(401).json({message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
+        res.status(401).json({message: 'Please ensure all required fields are included and in the correct format.'})
         return
     }
 
