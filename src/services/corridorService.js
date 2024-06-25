@@ -133,8 +133,20 @@ const updateCorridorByCode = asyncHandler(async (req, res) => {
     if(codCorridor){
         const corridor = await findCorridorByCode(codCorridor)
         if(corridor){
+            const updateFields = {};
+            for (const key in req.body) {
+                if (
+                    Object.prototype.hasOwnProperty.call(req.body, key) &&
+                    req.body[key] !== undefined &&
+                    req.body[key] !== null &&
+                    req.body[key] !== ""
+                ) {
+                    updateFields[key] = req.body[key];
+                }
+            }
+
             const filter = { _codCorridor: codCorridor }
-            const update = { $set: req.body}
+            const update = { $set: updateFields}
             const updatedCorridor = await updateCorridorData(filter, update)
             res.status(200).json(updatedCorridor)
         } else{

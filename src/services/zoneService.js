@@ -133,8 +133,19 @@ const updateZoneByCode = asyncHandler(async (req, res) => {
     if(codZone){
         const zone = await findZoneByCode(codZone)
         if(zone){
+            const updateFields = {};
+            for (const key in req.body) {
+                if (
+                    Object.prototype.hasOwnProperty.call(req.body, key) &&
+                    req.body[key] !== undefined &&
+                    req.body[key] !== null &&
+                    req.body[key] !== ""
+                ) {
+                    updateFields[key] = req.body[key];
+                }
+            }
             const filter = { _codZone: codZone }
-            const update = { $set: req.body}
+            const update = { $set: updateFields}
             const updatedZone = await updateZoneData(filter, update)
             res.status(200).json(updatedZone)
         } else{

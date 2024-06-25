@@ -4,7 +4,7 @@ const {verifyToken} = require("./authMiddleware");
 const {generateZone, getAllZones, getZoneByCode, updateZoneByCode, deleteZoneByCode} = require("../services/zoneService");
 const {generateCorridor, getAllCorridors, getCorridorByCode, updateCorridorByCode, deleteCorridorByCode} = require("../services/corridorService");
 const {generateShelf, getAllShelfs, getShelfByCode, updateShelfByCode, deleteShelfByCode, productTransfer,
-    addProductToShelf
+    addProductToShelf, updateProductInShelf
 } = require("../services/shelfService");
 const router = express.Router();
 
@@ -35,6 +35,7 @@ router.get('/shelf/:codShelf', verifyToken, getShelfByCode)
 router.put('/shelf/transfer', verifyToken, productTransfer)
 router.put('/shelf/:codShelf', verifyToken, updateShelfByCode)
 router.put('/shelf/:codShelf/product', verifyToken, addProductToShelf)
+router.put('/shelf/:codShelf/product/:codProduct', verifyToken, updateProductInShelf)
 router.delete("/shelf/:codShelf", verifyToken, deleteShelfByCode)
 
 module.exports = router

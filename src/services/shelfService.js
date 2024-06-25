@@ -91,7 +91,8 @@ const addProductToShelf = asyncHandler(async(req, res) => {
     }
 
     if (existingProduct) {
-        existingProduct._stock += productInShelf._stock;
+        existingProduct._stock = parseInt(existingProduct._stock, 10) + parseInt(productInShelf._stock, 10);
+        console.log(existingProduct)
     } else {
         shelf._productList.push({
             _codProduct: productInShelf._codProduct,
@@ -105,6 +106,47 @@ const addProductToShelf = asyncHandler(async(req, res) => {
     if(updatedShelfList){
         console.log(updatedShelfList)
         return res.status(200).json({ message: 'Add product to shelf', product: productInShelf})
+    }else{
+        return res.status(401).json({ message: 'Invalid shelf data' })
+    }
+
+})
+
+const updateProductInShelf = asyncHandler(async (req, res) => {
+    let stock = req.body._stock;
+    const codShelf = req.params.codShelf
+    const codProduct = req.params.codProduct
+
+    if(!stock){
+        return res.status(401).json({ message: 'Please ensure all required fields are included and in the correct format.' })
+    }
+
+    let responseProductService = await fetchData('http://localhost:4002/' + codProduct, req)
+    if(responseProductService.status === 401){
+        return res.status(401).json({ message: 'Product not defined.' })
+    }
+
+    const shelf = await findShelfByCode(codShelf)
+    if (!shelf) {
+        return res.status(404).json({ message: 'Shelf not found.' });
+    }
+
+    let index = shelf._productList.indexOf(codProduct);
+    shelf._productList.splice(index, 1);
+    shelf._productList.push({
+        _codProduct: codProduct,
+        _stock: stock
+    });
+    const filter = { _codShelf: req.params.codShelf };
+    const update = { $set: { _productList: shelf._productList } };
+
+    let updatedShelfList = await updateShelfData(filter, update)
+    if(updatedShelfList){
+        console.log(updatedShelfList)
+        return res.status(200).json({ message: 'Update product in shelf', product: {
+                _codProduct: codProduct,
+                _stock: stock
+            }})
     }else{
         return res.status(401).json({ message: 'Invalid shelf data' })
     }
@@ -199,7 +241,19 @@ const updateShelfByCode = asyncHandler(async (req, res) => {
     if(codShelf){
         const shelf = await findShelfByCode(codShelf)
         if(shelf){
-            const update = { $set: req.body }
+            const updateFields = {};
+            for (const key in req.body) {
+                if (
+                    Object.prototype.hasOwnProperty.call(req.body, key) &&
+                    req.body[key] !== undefined &&
+                    req.body[key] !== null &&
+                    req.body[key] !== ""
+                ) {
+                    updateFields[key] = req.body[key];
+                }
+            }
+            
+            const update = { $set: updateFields }
             const filter = { _codShelf: codShelf }
             const updatedShelf = await updateShelfData(filter, update)
             return res.status(200).json(updatedShelf)
@@ -399,5 +453,6 @@ module.exports = {
     verifyBodyFields,
     productTransfer,
     fetchData,
-    addProductToShelf
+    addProductToShelf,
+    updateProductInShelf
 }
