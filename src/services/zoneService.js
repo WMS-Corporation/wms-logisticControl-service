@@ -3,6 +3,8 @@ const {createZoneFromData} = require("../factories/zoneFactory");
 const {findStorageByCode, generateUniqueCode, updateStorageData, getStorages} = require("../repositories/storageRepository");
 const {createZone, getZonesByStorageCode, findZoneByCode, updateZoneData, deleteZone} = require("../repositories/zoneRepository");
 const {verifyBodyFields} = require("./shelfService");
+const {getShelf, deleteShelf} = require("../repositories/shelfRepository");
+const {getCorridors, deleteCorridor} = require("../repositories/corridorRepository");
 
 /**
  * Generate a new zone.
@@ -175,6 +177,16 @@ const deleteZoneByCode = asyncHandler(async (req, res) => {
     if(codZone){
         const zone = await findZoneByCode(codZone)
         if(zone){
+            let corridors = await getCorridors()
+            for (let corridor of zone._corridorCodeList){
+                let corridorToDelete = corridors.find(item => item._codCorridor === corridor)
+                if(corridorToDelete){
+                    for(let shelf of corridorToDelete._shelfCodeList){
+                        await deleteShelf(shelf)
+                    }
+                    await deleteCorridor(corridorToDelete._codCorridor)
+                }
+            }
             const zoneCode = zone._codZone
             await deleteZone(zoneCode)
             let storages = await getStorages();

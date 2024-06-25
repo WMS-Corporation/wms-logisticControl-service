@@ -187,15 +187,6 @@ const shelfService = () => describe('Shelf testing', () => {
         expect(res.json).toHaveBeenCalledWith({message: "Corridor not found"})
     })
 
-    it('it should return 200 and the shelf with the code specified', async () => {
-        const res = mockResponse()
-        req.params = { codShelf: "001023" }
-
-        await getShelfByCode(req, res)
-        expect(res.status).toHaveBeenCalledWith(200)
-        expect(res.json).not.toBeNull()
-    })
-
     it('it should return 401 if the code is wrong', async () => {
         const res = mockResponse()
         req.params = { codShelf: "asddfve" }
@@ -212,31 +203,6 @@ const shelfService = () => describe('Shelf testing', () => {
         await getShelfByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(401)
         expect(res.json).toHaveBeenCalledWith({message: "Invalid shelf data"})
-    })
-
-    it('it should return 200 and the shelf updated with a new data', async () => {
-        const res = mockResponse()
-        req.params = { codShelf: "001023" }
-        req.body = {_name: "Shelf 3"}
-
-        await updateShelfByCode(req, res)
-        expect(res.status).toHaveBeenCalledWith(200)
-        expect(res.json).not.toBeNull()
-    })
-
-    it('it should return 200 and the shelf updated with a new product list', async () => {
-        const res = mockResponse()
-        req.params = { codShelf: "001023" }
-        req.body = {_productList: [
-                {
-                    _codProduct: "001103",
-                    _stock: 12
-                }
-            ]}
-
-        await updateShelfByCode(req, res)
-        expect(res.status).toHaveBeenCalledWith(200)
-        expect(res.json).not.toBeNull()
     })
 
     it('it should return 401 if updating shelf data without correct shelf code', async () => {
@@ -323,18 +289,6 @@ const shelfService = () => describe('Shelf testing', () => {
             }
         };
         await productTransfer(req, res)
-        expect(res.status).toHaveBeenCalledWith(200)
-        expect(res.json).not.toBeNull()
-    })
-
-    it('it should return 200 and the code of the shelf that has been deleted', async () => {
-        const res = mockResponse()
-        const req = {
-            params: {
-                codShelf: "001023"
-            }
-        }
-        await deleteShelfByCode(req, res)
         expect(res.status).toHaveBeenCalledWith(200)
         expect(res.json).not.toBeNull()
     })

@@ -2,6 +2,9 @@ const asyncHandler = require("express-async-handler");
 const {createStorageFromData} = require("../factories/storageFactory");
 const {createStorage, getStorages, findStorageByCode, updateStorageData, deleteStorage, generateUniqueCode} = require("../repositories/storageRepository");
 const {verifyBodyFields} = require("./shelfService");
+const {getCorridors, deleteCorridor, findCorridorByCode} = require("../repositories/corridorRepository");
+const {deleteShelf} = require("../repositories/shelfRepository");
+const {getZones, deleteZone} = require("../repositories/zoneRepository");
 
 /**
  * Generate a new storage.
@@ -141,6 +144,20 @@ const deleteStorageByCode = asyncHandler(async (req, res) => {
     if(codStorage){
         const storage = await findStorageByCode(codStorage)
         if(storage){
+            let zones = await getZones()
+            for(let zone of storage._zoneCodeList){
+                let zoneToDelete = zones.find(item => item._codZone === zone)
+                if(zoneToDelete){
+                    for (let corridor of zoneToDelete._corridorCodeList){
+                        let corridorToDelete = await findCorridorByCode(corridor)
+                        for(let shelf of corridorToDelete._shelfCodeList){
+                            await deleteShelf(shelf)
+                        }
+                        await deleteCorridor(corridorToDelete._codCorridor)
+                    }
+                    await deleteZone(zoneToDelete._codZone)
+                }
+            }
             const storageCode = storage._codStorage
             await deleteStorage(storageCode)
             res.status(200).json(storageCode)

@@ -4,6 +4,7 @@ const {findZoneByCode, updateZoneData, getZones} = require("../repositories/zone
 const {generateUniqueCode} = require("../repositories/storageRepository");
 const {createCorridor, getCorridorsByZoneCode, findCorridorByCode, updateCorridorData, deleteCorridor} = require("../repositories/corridorRepository");
 const {verifyBodyFields} = require("./shelfService");
+const {getShelf, deleteShelf} = require("../repositories/shelfRepository");
 
 /**
  * Generate a new corridor.
@@ -176,6 +177,13 @@ const deleteCorridorByCode = asyncHandler(async (req, res) => {
     if(codCorridor){
         const corridor = await findCorridorByCode(codCorridor)
         if(corridor){
+            let shelfs = await getShelf()
+            for (let shelf of shelfs){
+                let codShelfToDelete = corridor._shelfCodeList.find(item => item === shelf._codShelf)
+                if(codShelfToDelete){
+                    await deleteShelf(codShelfToDelete)
+                }
+            }
             const corridorCode = corridor._codCorridor
             await deleteCorridor(corridorCode)
             let zones = await getZones();

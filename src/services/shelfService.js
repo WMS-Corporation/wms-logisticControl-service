@@ -307,6 +307,33 @@ const deleteShelfByCode = asyncHandler(async (req, res) => {
     }
 })
 
+const deleteProductOfShelf = asyncHandler(async (req, res) => {
+    const codShelf = req.params.codShelf
+    const codProduct = req.params.codProduct
+
+    let responseProductService = await fetchData('http://localhost:4002/' + codProduct, req)
+    if(responseProductService.status === 401){
+        return res.status(401).json({ message: 'Product not defined.' })
+    }
+
+    const shelf = await findShelfByCode(codShelf)
+    if (!shelf) {
+        return res.status(404).json({ message: 'Shelf not found.' });
+    }
+
+    let index = shelf._productList.indexOf(codProduct);
+    shelf._productList.splice(index, 1);
+    const filter = { _codShelf: req.params.codShelf };
+    const update = { $set: { _productList: shelf._productList } };
+
+    let updatedShelfList = await updateShelfData(filter, update)
+    if(updatedShelfList){
+        return res.status(200).json({ message: 'Delete product in shelf', product: codProduct})
+    }else{
+        return res.status(401).json({ message: 'Invalid shelf data' })
+    }
+})
+
 /**
  * Verifies the fields in the request body based on the operation type and the valid fields for the main entity and sub-entities.
  *
@@ -454,5 +481,6 @@ module.exports = {
     productTransfer,
     fetchData,
     addProductToShelf,
-    updateProductInShelf
+    updateProductInShelf,
+    deleteProductOfShelf
 }
