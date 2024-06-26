@@ -69,6 +69,18 @@ const generateShelf = asyncHandler(async(req, res) => {
 
 })
 
+/**
+ * Adds a product to a shelf.
+ *
+ * This function handles the addition of a product to a specific shelf based on the provided shelf code and product details.
+ * It verifies the existence of the product and the shelf, updates the product's stock in the shelf's product list if it already exists,
+ * or adds the product to the list if it doesn't exist, and updates the shelf data in the database.
+ * If the product or shelf is not found, it returns an appropriate error message.
+ *
+ * @param {Object} req - The request object containing the shelf code in the parameters and the product details in the body.
+ * @param {Object} res - The response object used to send the result of the addition process.
+ * @returns {Object} The HTTP response indicating the result of the addition process.
+ */
 const addProductToShelf = asyncHandler(async(req, res) => {
     let productInShelf = req.body;
     if(productInShelf._codProduct === undefined || productInShelf._stock === undefined){
@@ -92,7 +104,6 @@ const addProductToShelf = asyncHandler(async(req, res) => {
 
     if (existingProduct) {
         existingProduct._stock = parseInt(existingProduct._stock, 10) + parseInt(productInShelf._stock, 10);
-        console.log(existingProduct)
     } else {
         shelf._productList.push({
             _codProduct: productInShelf._codProduct,
@@ -112,6 +123,18 @@ const addProductToShelf = asyncHandler(async(req, res) => {
 
 })
 
+/**
+ * Updates the stock of a product in a shelf.
+ *
+ * This function handles the update of a product's stock in a specific shelf based on the provided shelf and product codes.
+ * It verifies the existence of the product and the shelf, updates the product's stock in the shelf's product list,
+ * and updates the shelf data in the database.
+ * If the product or shelf is not found, it returns an appropriate error message.
+ *
+ * @param {Object} req - The request object containing the shelf code and product code in the parameters and the new stock in the body.
+ * @param {Object} res - The response object used to send the result of the update process.
+ * @returns {Object} The HTTP response indicating the result of the update process.
+ */
 const updateProductInShelf = asyncHandler(async (req, res) => {
     let stock = req.body._stock;
     const codShelf = req.params.codShelf
@@ -151,6 +174,27 @@ const updateProductInShelf = asyncHandler(async (req, res) => {
         return res.status(401).json({ message: 'Invalid shelf data' })
     }
 
+})
+
+/**
+ * Retrieves all shelves.
+ *
+ * This function handles the retrieval of all shelves from the database.
+ * It calls the getShelf function to fetch the shelf data.
+ * If the retrieval is successful, it returns the shelf data with HTTP status code 200 (OK).
+ * If the retrieval fails (e.g., invalid shelf data), it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object used to send the result of the retrieval process.
+ * @returns {Object} The HTTP response containing either the shelf data or an error message in JSON format.
+ */
+const viewAllShelf = asyncHandler(async (req, res) => {
+    const result = await getShelf();
+    if(result){
+        res.status(200).json(result)
+    } else {
+        res.status(401).json({message: 'Invalid shelf data'})
+    }
 })
 
 /**
@@ -307,6 +351,18 @@ const deleteShelfByCode = asyncHandler(async (req, res) => {
     }
 })
 
+/**
+ * Deletes a product from a shelf.
+ *
+ * This function handles the deletion of a product from a specific shelf based on the provided shelf and product codes.
+ * It verifies the existence of the product and the shelf, removes the product from the shelf's product list,
+ * and updates the shelf data in the database.
+ * If the product or shelf is not found, it returns an appropriate error message.
+ *
+ * @param {Object} req - The request object containing the shelf code and product code in the parameters.
+ * @param {Object} res - The response object used to send the result of the deletion process.
+ * @returns {Object} The HTTP response indicating the result of the deletion process.
+ */
 const deleteProductOfShelf = asyncHandler(async (req, res) => {
     const codShelf = req.params.codShelf
     const codProduct = req.params.codProduct
@@ -402,7 +458,8 @@ const productTransfer = asyncHandler(async (req, res) => {
 
         if (fromShelf) {
             const productFromShelf = fromShelf._productList.find(product => product._codProduct === transfer._codProduct);
-            productFromShelf._stock -= transfer._quantity;
+            //productFromShelf._stock -= transfer._quantity;
+            productFromShelf._stock = parseInt(productFromShelf._stock, 10) - parseInt(transfer._quantity, 10);
             productsUpdated.push(productFromShelf)
             const filter = { _codShelf: fromShelf._codShelf }
             update.$set["_productList"] = fromShelf._productList
@@ -412,7 +469,7 @@ const productTransfer = asyncHandler(async (req, res) => {
         if (toShelf) {
             const productToShelf = toShelf._productList.find(product => product._codProduct === transfer._codProduct);
             if(productToShelf){
-                productToShelf._stock += transfer._quantity;
+                productToShelf._stock = parseInt(productToShelf._stock, 10) + parseInt(transfer._quantity, 10);
             } else {
                 toShelf._productList.push({
                     _codProduct: transfer._codProduct,
@@ -482,5 +539,6 @@ module.exports = {
     fetchData,
     addProductToShelf,
     updateProductInShelf,
-    deleteProductOfShelf
+    deleteProductOfShelf,
+    viewAllShelf
 }
