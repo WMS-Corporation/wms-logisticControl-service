@@ -140,9 +140,9 @@ const updateShelfByCode = asyncHandler(async (req, res) => {
         if(codShelf){
             const shelf = await findShelfByCode(codShelf)
             if(shelf){
-                const updateData = handleUpdateData(req.body, shelf)
+                const update = { $set: req.body }
                 const filter = { _codShelf: codShelf }
-                const updatedShelf = await updateShelfData(filter, updateData)
+                const updatedShelf = await updateShelfData(filter, update)
                 res.status(200).json(updatedShelf)
             } else{
                 res.status(401).json({message: 'Shelf not found'})
@@ -237,48 +237,6 @@ const verifyBodyFields = (body, operation, validFields, subEntityValidFields) =>
                 value.every(item => (validateFields(subEntityValidFields, item)) && item._codProduct)));
     }
 
-}
-
-/**
- * Function to handle updating shelf data based on the provided body and existing shelf.
- *
- * This function takes the update data from the request body and the existing shelf data.
- * If product list is provided, it iterates through the products in the update data and updates the corresponding products in the existing shelf.
- * If a product to be updated does not exist in the existing shelf, it adds the new product to the shelf.
- * The updated shelf data, including the modified product list, is returned.
- * If no product list is provided in the update data, the entire body is treated as the update, excluding the product list.
- *
- * @param {Object} body - The body containing the update data.
- * @param {Object} shelf - The existing shelf data.
- * @return {Object|null} - The update object or null if any product to be updated does not exist.
- **/
-const handleUpdateData = (body, shelf) => {
-    if (body._productList) {
-        const shelfProductMap = new Map(shelf._productList.map((product) => [product._codProduct, product]))
-        const productListToUpdate  = body._productList
-
-        const update = { $set: {} };
-        Object.keys(body).forEach(key => {
-            if (key !== '_productList') {
-                update.$set[key] = body[key];
-            }
-        });
-
-        productListToUpdate.forEach(productToUpdate => {
-            let product = shelfProductMap.get(productToUpdate._codProduct)
-            if(product){
-                Object.keys(productToUpdate).forEach(field => {
-                    product[field] = productToUpdate[field]
-                });
-            } else {
-                shelfProductMap.set(productToUpdate._codProduct, productToUpdate)
-            }
-        })
-        update.$set["_productList"] = Array.from(shelfProductMap.values())
-        return update;
-    } else {
-        return  { $set: body }
-    }
 }
 
 /**
