@@ -2,6 +2,7 @@ const {collections} = require("../config/dbConnection");
 const { getSocket } = require('../utils/socketManager');
 
 const asyncHandler = require("express-async-handler");
+require('dotenv').config();
 
 /**
  * Creates a new zone.
@@ -70,8 +71,10 @@ const updateZoneData = asyncHandler(async(filter, update) => {
     zone = await collections?.zones?.findOne(filter);
     if (!zone) return null;
 
-    const TEMPERATURE_THRESHOLD = 18;
-    if (zone._temperature < TEMPERATURE_THRESHOLD) {
+    let validRange = zone._coolingSystemStatus === "Active" ? process.env.TEMPERATURE_REFRIGERATED_VALID_RANGE || "-18;0" : process.env.TEMPERATURE_NOT_REFRIGERATED_VALID_RANGE|| "0;25";
+    let [min, max] = validRange.split(';').map(Number);
+            
+    if (zone._temperature >= max || zone._temperature <= min) {
         const socket = getSocket();
         socket.emit('temperature-alert', { zone: zone._codZone, temperature: zone._temperature });
     }
