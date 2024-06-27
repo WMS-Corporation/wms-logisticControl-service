@@ -1,4 +1,6 @@
 const {collections} = require("../config/dbConnection");
+const { getSocket } = require('../utils/socketManager');
+
 const asyncHandler = require("express-async-handler");
 
 /**
@@ -59,9 +61,22 @@ const findZoneByCode = asyncHandler(async (codZone) => {
  * @returns {Object|null} The updated zone data if the zone is found, otherwise null.
  */
 const updateZoneData = asyncHandler(async(filter, update) => {
-    const options = { returnOriginal: false}
-    await collections?.zones?.findOneAndUpdate(filter, update, options)
-    return await collections?.zones?.findOne(filter)
+    const options = { returnOriginal: false };
+    let zone = await collections?.zones?.findOne(filter);
+    if (!zone) return null;
+
+    await collections?.zones?.findOneAndUpdate(filter, update, options);
+    
+    zone = await collections?.zones?.findOne(filter);
+    if (!zone) return null;
+
+    const TEMPERATURE_THRESHOLD = 18;
+    if (zone._temperature < TEMPERATURE_THRESHOLD) {
+        const socket = getSocket();
+        socket.emit('temperature-alert', { zone: zone._codZone, temperature: zone._temperature });
+    }
+    
+    return zone;
 })
 
 /**

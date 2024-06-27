@@ -1,10 +1,14 @@
 const express = require('express');
-const cors = require('cors');
-const {connectDB} = require("./src/config/dbConnection");
 const dotenv = require('dotenv');
-const router = require('./src/routes/route')
+const cors = require('cors');
 const http = require('http');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger-doc.json');
 const socketClient = require('socket.io-client');
+
+const {connectDB} = require("./src/config/dbConnection");
+const router = require('./src/routes/route');
+const { connectSocket } = require('./src/utils/socketManager');
 
 const logisticControlServicePort = process.env.PORT || 4005;
 let corsOptions = {
@@ -16,32 +20,8 @@ const app = express();
 const server = http.createServer(app);
 
 const gatewayUrl = process.env.GATEWAY_URL;
-const socket = socketClient(gatewayUrl);
+connectSocket(gatewayUrl);
 
-socket.on('connect', () => {
-    console.log(`Connected to gateway at ${gatewayUrl}`);
-});
-
-
-
-// Simula il monitoraggio della temperatura e invia alert quando necessario
-function monitorTemperature() {
-    const zone = 'Zona 1';
-    const temperature = Math.floor(Math.random() * 30); // Simula una lettura della temperatura
-
-    if (temperature < 18) { // Soglia di temperatura
-        console.log(`Temperature alert for ${zone}: ${temperature}°C`);
-        // Invia l'alert al gateway
-        socket.emit('temperature-alert', { zone, temperature });
-    }
-}
-
-setInterval(monitorTemperature, 5000); // Controlla la temperatura ogni 5 secondi
-
-
-
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger-doc.json'); // Importa il file di documentazione Swagger JSON
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.disable("x-powered-by");
