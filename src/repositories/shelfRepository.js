@@ -12,7 +12,7 @@ const { getSocket } = require('../utils/socketManager');
  * @throws {Error} If failed to create shelf.
  */
 const createShelf = asyncHandler(async (shelf) => {
-    return await collections?.shelfs?.insertOne(shelf)
+    return await collections?.shelfs?.insertOne(shelf);
 });
 
 /**
@@ -23,8 +23,8 @@ const createShelf = asyncHandler(async (shelf) => {
  * @returns {Array|null} An array containing shelf data if retrieval is successful, otherwise null.
  */
 const getShelfsByCorridorCode = asyncHandler(async (codCorridor) => {
-    let corridor = await collections?.corridors?.findOne({ _codCorridor: codCorridor })
-    return corridor._shelfCodeList
+    let corridor = await collections?.corridors?.findOne({ _codCorridor: codCorridor });
+    return corridor._shelfCodeList;
 })
 
 /**
@@ -35,7 +35,7 @@ const getShelfsByCorridorCode = asyncHandler(async (codCorridor) => {
  * @returns {Array|null} An array containing corridor data if retrieval is successful, otherwise null.
  */
 const getShelf = asyncHandler(async () => {
-    return await collections?.shelfs?.find().toArray()
+    return await collections?.shelfs?.find().toArray();
 })
 
 /**
@@ -47,7 +47,7 @@ const getShelf = asyncHandler(async () => {
  * @returns {Object|null} The shelf object if found, or null if not found.
  */
 const findShelfByCode = asyncHandler(async (shelfCode) => {
-    return await collections?.shelfs?.findOne({ _codShelf: shelfCode })
+    return await collections?.shelfs?.findOne({ _codShelf: shelfCode });
 });
 
 /**
@@ -59,47 +59,22 @@ const findShelfByCode = asyncHandler(async (shelfCode) => {
  * @param {Object} update - The update object containing the fields to update and their new values.
  * @returns {Object|null} The updated shelf data if the corridor is found, otherwise null.
  */
-const updateShelfData = asyncHandler(async (filter, update) => {
-    const options = { returnOriginal: false };
+const updateShelfData = asyncHandler(async(filter, update) => {
+    const options = { returnOriginal: false};
     await collections?.shelfs?.findOneAndUpdate(filter, update, options);
-    let updatedShelf = await collections?.shelfs?.findOne(filter);
-    const productCode = update.$set.productCode; // Assumendo che il codice del prodotto sia incluso nell'update
-    const allShelves = await getAllShelvesWithProduct(productCode); // Implementa questa funzione per recuperare tutti gli scaffali con il prodotto
-    let totalStock = 0;
+    let updatedShelf =  await collections?.shelfs?.findOne(filter);
 
-    allShelves.forEach(shelf => {
-        const product = shelf.productList.find(p => p.code === productCode);
-        if (product) {
-            totalStock += product.quantity;
+    const threshold = 10;
+
+    shelf._productList.forEach(product => {
+        if (product._stock < threshold) {
+            const socket = getSocket();
+            socket.emit('lowStockAlert', { productCode: product._codProduct, totalStock: product._stock });
         }
     });
 
-    const threshold = 10;
-    if (totalStock < threshold) {
-        const socket = getSocket();
-        socket.emit('lowStockAlert', { productCode, totalStock });
-    }
-
-    return updatedShelf;
+    return updatedShelf
 })
-
-const getAllShelvesWithProduct = asyncHandler(async (productCode) => {
-    if (!collections?.shelfs) {
-        console.error("Database connection is not established.");
-        return [];
-    }
-
-    try {
-        const shelves = await collections.shelfs.find({
-            "productList.code": productCode
-        }).toArray();
-
-        return shelves;
-    } catch (error) {
-        console.error("Failed to retrieve shelves with product:", error);
-        throw new Error("Failed to retrieve shelves with the specified product.");
-    }
-});
 
 /**
  * Deletes a shelf based on shelf code.
@@ -110,7 +85,7 @@ const getAllShelvesWithProduct = asyncHandler(async (productCode) => {
  * @returns {Object} The result of the deletion operation.
  */
 const deleteShelf = asyncHandler(async (codShelf) => {
-    return await collections?.shelfs?.deleteOne({ _codShelf: codShelf })
+    return await collections?.shelfs?.deleteOne({ _codShelf: codShelf });
 })
 
 module.exports = {
