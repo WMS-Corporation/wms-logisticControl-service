@@ -23,7 +23,7 @@ const generateShelf = asyncHandler(async(req, res) => {
     if(verifyBodyFields(req.body, "Create", shelfValidFields, productValidFields)){
         shelf = createShelfFromData(req.body)
     } else {
-        return res.status(401).json({ message: 'Invalid request body. Please ensure all required fields are included and in the correct format.' })
+        return res.status(401).json({ message: 'Please ensure all required fields are included and in the correct format.' })
     }
 
     if(!shelf.name){
@@ -35,6 +35,13 @@ const generateShelf = asyncHandler(async(req, res) => {
     } else {
         if(Array.isArray(shelf.productList) && !shelf.productList.every(item => typeof item === 'object' && item !== null)){
             return res.status(401).json({ message: 'Invalid format of product list' })
+        }
+
+        for(let product of shelf.productList){
+            let responseProductService = await fetchData('http://localhost:4002/' + product._codProduct, req)
+            if(responseProductService.status === 401){
+                return res.status(401).json({ message: 'Product not defined.' })
+            }
         }
     }
 
@@ -60,6 +67,134 @@ const generateShelf = asyncHandler(async(req, res) => {
         res.status(401).json({message:'Invalid corridor data'})
     }
 
+})
+
+/**
+ * Adds a product to a shelf.
+ *
+ * This function handles the addition of a product to a specific shelf based on the provided shelf code and product details.
+ * It verifies the existence of the product and the shelf, updates the product's stock in the shelf's product list if it already exists,
+ * or adds the product to the list if it doesn't exist, and updates the shelf data in the database.
+ * If the product or shelf is not found, it returns an appropriate error message.
+ *
+ * @param {Object} req - The request object containing the shelf code in the parameters and the product details in the body.
+ * @param {Object} res - The response object used to send the result of the addition process.
+ * @returns {Object} The HTTP response indicating the result of the addition process.
+ */
+const addProductToShelf = asyncHandler(async(req, res) => {
+    let productInShelf = req.body;
+    if(productInShelf._codProduct === undefined || productInShelf._stock === undefined){
+        return res.status(401).json({ message: 'Please ensure all required fields are included and in the correct format.' })
+    }
+
+    let responseProductService = await fetchData('http://localhost:4002/' + productInShelf._codProduct, req)
+    if(responseProductService.status === 401){
+        return res.status(401).json({ message: 'Product not defined.' })
+    }
+
+    const shelf = await findShelfByCode(req.params.codShelf)
+    if (!shelf) {
+        return res.status(404).json({ message: 'Shelf not found.' });
+    }
+
+    let existingProduct = null
+    if(shelf._productList.length > 0){
+        existingProduct = shelf._productList.find(product => product._codProduct === productInShelf._codProduct);
+    }
+
+    if (existingProduct) {
+        existingProduct._stock = parseInt(existingProduct._stock, 10) + parseInt(productInShelf._stock, 10);
+    } else {
+        shelf._productList.push({
+            _codProduct: productInShelf._codProduct,
+            _stock: productInShelf._stock
+        });
+    }
+    const filter = { _codShelf: req.params.codShelf };
+    const update = { $set: { _productList: shelf._productList } };
+
+    let updatedShelfList = await updateShelfData(filter, update)
+    if(updatedShelfList){
+        console.log(updatedShelfList)
+        return res.status(200).json({ message: 'Add product to shelf', product: productInShelf})
+    }else{
+        return res.status(401).json({ message: 'Invalid shelf data' })
+    }
+
+})
+
+/**
+ * Updates the stock of a product in a shelf.
+ *
+ * This function handles the update of a product's stock in a specific shelf based on the provided shelf and product codes.
+ * It verifies the existence of the product and the shelf, updates the product's stock in the shelf's product list,
+ * and updates the shelf data in the database.
+ * If the product or shelf is not found, it returns an appropriate error message.
+ *
+ * @param {Object} req - The request object containing the shelf code and product code in the parameters and the new stock in the body.
+ * @param {Object} res - The response object used to send the result of the update process.
+ * @returns {Object} The HTTP response indicating the result of the update process.
+ */
+const updateProductInShelf = asyncHandler(async (req, res) => {
+    let stock = req.body._stock;
+    const codShelf = req.params.codShelf
+    const codProduct = req.params.codProduct
+
+    if(!stock){
+        return res.status(401).json({ message: 'Please ensure all required fields are included and in the correct format.' })
+    }
+
+    let responseProductService = await fetchData('http://localhost:4002/' + codProduct, req)
+    if(responseProductService.status === 401){
+        return res.status(401).json({ message: 'Product not defined.' })
+    }
+
+    const shelf = await findShelfByCode(codShelf)
+    if (!shelf) {
+        return res.status(404).json({ message: 'Shelf not found.' });
+    }
+
+    let index = shelf._productList.indexOf(codProduct);
+    shelf._productList.splice(index, 1);
+    shelf._productList.push({
+        _codProduct: codProduct,
+        _stock: stock
+    });
+    const filter = { _codShelf: req.params.codShelf };
+    const update = { $set: { _productList: shelf._productList } };
+
+    let updatedShelfList = await updateShelfData(filter, update)
+    if(updatedShelfList){
+        console.log(updatedShelfList)
+        return res.status(200).json({ message: 'Update product in shelf', product: {
+                _codProduct: codProduct,
+                _stock: stock
+            }})
+    }else{
+        return res.status(401).json({ message: 'Invalid shelf data' })
+    }
+
+})
+
+/**
+ * Retrieves all shelves.
+ *
+ * This function handles the retrieval of all shelves from the database.
+ * It calls the getShelf function to fetch the shelf data.
+ * If the retrieval is successful, it returns the shelf data with HTTP status code 200 (OK).
+ * If the retrieval fails (e.g., invalid shelf data), it returns an error message with HTTP status code 401 (Unauthorized).
+ *
+ * @param {Object} req - The request object.
+ * @param {Object} res - The response object used to send the result of the retrieval process.
+ * @returns {Object} The HTTP response containing either the shelf data or an error message in JSON format.
+ */
+const viewAllShelf = asyncHandler(async (req, res) => {
+    const result = await getShelf();
+    if(result){
+        res.status(200).json(result)
+    } else {
+        res.status(401).json({message: 'Invalid shelf data'})
+    }
 })
 
 /**
@@ -135,21 +270,42 @@ const updateShelfByCode = asyncHandler(async (req, res) => {
     const codShelf = req.params.codShelf
 
     if(!verifyBodyFields(req.body, "Update", shelfValidFields, productValidFields)){
-        res.status(401).json({message: 'Invalid request body. Please ensure all required fields are included and in the correct format.'})
-    } else {
-        if(codShelf){
-            const shelf = await findShelfByCode(codShelf)
-            if(shelf){
-                const update = { $set: req.body }
-                const filter = { _codShelf: codShelf }
-                const updatedShelf = await updateShelfData(filter, update)
-                res.status(200).json(updatedShelf)
-            } else{
-                res.status(401).json({message: 'Shelf not found'})
+        return res.status(401).json({message: 'Please ensure all required fields are included and in the correct format.'})
+    }
+
+    if(req.body._productList){
+        for(let product of req.body._productList){
+            let responseProductService = await fetchData('http://localhost:4002/' + product._codProduct, req)
+            if(responseProductService.status === 401){
+                return res.status(401).json({ message: 'Product not defined.' })
             }
-        }else{
-            res.status(401).json({message:'Invalid shelf data'})
         }
+    }
+
+    if(codShelf){
+        const shelf = await findShelfByCode(codShelf)
+        if(shelf){
+            const updateFields = {};
+            for (const key in req.body) {
+                if (
+                    Object.prototype.hasOwnProperty.call(req.body, key) &&
+                    req.body[key] !== undefined &&
+                    req.body[key] !== null &&
+                    req.body[key] !== ""
+                ) {
+                    updateFields[key] = req.body[key];
+                }
+            }
+            
+            const update = { $set: updateFields }
+            const filter = { _codShelf: codShelf }
+            const updatedShelf = await updateShelfData(filter, update)
+            return res.status(200).json(updatedShelf)
+        } else{
+            return res.status(401).json({message: 'Shelf not found'})
+        }
+    }else{
+        return res.status(401).json({message:'Invalid shelf data'})
     }
 
 })
@@ -192,6 +348,45 @@ const deleteShelfByCode = asyncHandler(async (req, res) => {
         }
     }else{
         res.status(401).json({message:'Invalid shelf data'})
+    }
+})
+
+/**
+ * Deletes a product from a shelf.
+ *
+ * This function handles the deletion of a product from a specific shelf based on the provided shelf and product codes.
+ * It verifies the existence of the product and the shelf, removes the product from the shelf's product list,
+ * and updates the shelf data in the database.
+ * If the product or shelf is not found, it returns an appropriate error message.
+ *
+ * @param {Object} req - The request object containing the shelf code and product code in the parameters.
+ * @param {Object} res - The response object used to send the result of the deletion process.
+ * @returns {Object} The HTTP response indicating the result of the deletion process.
+ */
+const deleteProductOfShelf = asyncHandler(async (req, res) => {
+    const codShelf = req.params.codShelf
+    const codProduct = req.params.codProduct
+
+    let responseProductService = await fetchData('http://localhost:4002/' + codProduct, req)
+    if(responseProductService.status === 401){
+        return res.status(401).json({ message: 'Product not defined.' })
+    }
+
+    const shelf = await findShelfByCode(codShelf)
+    if (!shelf) {
+        return res.status(404).json({ message: 'Shelf not found.' });
+    }
+
+    let index = shelf._productList.indexOf(codProduct);
+    shelf._productList.splice(index, 1);
+    const filter = { _codShelf: req.params.codShelf };
+    const update = { $set: { _productList: shelf._productList } };
+
+    let updatedShelfList = await updateShelfData(filter, update)
+    if(updatedShelfList){
+        return res.status(200).json({ message: 'Delete product in shelf', product: codProduct})
+    }else{
+        return res.status(401).json({ message: 'Invalid shelf data' })
     }
 })
 
@@ -263,7 +458,8 @@ const productTransfer = asyncHandler(async (req, res) => {
 
         if (fromShelf) {
             const productFromShelf = fromShelf._productList.find(product => product._codProduct === transfer._codProduct);
-            productFromShelf._stock -= transfer._quantity;
+            //productFromShelf._stock -= transfer._quantity;
+            productFromShelf._stock = parseInt(productFromShelf._stock, 10) - parseInt(transfer._quantity, 10);
             productsUpdated.push(productFromShelf)
             const filter = { _codShelf: fromShelf._codShelf }
             update.$set["_productList"] = fromShelf._productList
@@ -273,7 +469,7 @@ const productTransfer = asyncHandler(async (req, res) => {
         if (toShelf) {
             const productToShelf = toShelf._productList.find(product => product._codProduct === transfer._codProduct);
             if(productToShelf){
-                productToShelf._stock += transfer._quantity;
+                productToShelf._stock = parseInt(productToShelf._stock, 10) + parseInt(transfer._quantity, 10);
             } else {
                 toShelf._productList.push({
                     _codProduct: transfer._codProduct,
@@ -290,6 +486,37 @@ const productTransfer = asyncHandler(async (req, res) => {
 
     res.status(200).json(productsUpdated)
 })
+
+/**
+ * Fetches data from the specified URL using the provided request options.
+ *
+ * @param {string} url - The URL to fetch data from.
+ * @param {Object} req - The request object containing headers and user information.
+ * @returns {Promise<Object>} A promise that resolves to an object containing the status and data.
+ *                           - { status: 200, data } if the request is successful.
+ *                           - { status: 401 } if the response is not OK.
+ *                           - { status: 500 } if there is an error during the request.
+ */
+const fetchData = async (url, req) => {
+    let authorization = req.headers.authorization
+    const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', 'Authorization': authorization},
+        user: req.user
+    }
+
+    try {
+        const response = await fetch(url, requestOptions)
+        if (!response.ok) {
+            return { status: 401 }
+        }
+        const data = await response.json()
+        return { status: 200, data }
+    } catch (error) {
+        console.error('Error during the request:', error)
+        return { status: 500 }
+    }
+}
 
 const shelfValidFields = [
     "_name",
@@ -308,5 +535,10 @@ module.exports = {
     updateShelfByCode,
     deleteShelfByCode,
     verifyBodyFields,
-    productTransfer
+    productTransfer,
+    fetchData,
+    addProductToShelf,
+    updateProductInShelf,
+    deleteProductOfShelf,
+    viewAllShelf
 }
