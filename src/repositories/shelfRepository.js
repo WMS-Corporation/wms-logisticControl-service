@@ -66,7 +66,7 @@ const updateShelfData = asyncHandler(async(filter, update) => {
 
     const threshold = 10;
 
-    shelf._productList.forEach(product => {
+    updatedShelf._productList.forEach(product => {
         if (product._stock < threshold) {
             const socket = getSocket();
             socket.emit('lowStockAlert', { productCode: product._codProduct, totalStock: product._stock });
