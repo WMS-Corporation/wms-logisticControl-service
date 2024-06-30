@@ -1,5 +1,6 @@
-const {collections} = require("../config/dbConnection");
+const { collections } = require("../config/dbConnection");
 const asyncHandler = require("express-async-handler");
+const { getSocket } = require('../utils/socketManager');
 
 /**
  * Creates a new shelf.
@@ -22,7 +23,7 @@ const createShelf = asyncHandler(async (shelf) => {
  * @returns {Array|null} An array containing shelf data if retrieval is successful, otherwise null.
  */
 const getShelfsByCorridorCode = asyncHandler(async (codCorridor) => {
-    let corridor = await collections?.corridors?.findOne({_codCorridor:codCorridor})
+    let corridor = await collections?.corridors?.findOne({ _codCorridor: codCorridor })
     return corridor._shelfCodeList
 })
 
@@ -58,11 +59,47 @@ const findShelfByCode = asyncHandler(async (shelfCode) => {
  * @param {Object} update - The update object containing the fields to update and their new values.
  * @returns {Object|null} The updated shelf data if the corridor is found, otherwise null.
  */
-const updateShelfData = asyncHandler(async(filter, update) => {
-    const options = { returnOriginal: false}
-    await collections?.shelfs?.findOneAndUpdate(filter, update, options)
-    return await collections?.shelfs?.findOne(filter)
+const updateShelfData = asyncHandler(async (filter, update) => {
+    const options = { returnOriginal: false };
+    await collections?.shelfs?.findOneAndUpdate(filter, update, options);
+    let updatedShelf = await collections?.shelfs?.findOne(filter);
+    const productCode = update.$set.productCode; // Assumendo che il codice del prodotto sia incluso nell'update
+    const allShelves = await getAllShelvesWithProduct(productCode); // Implementa questa funzione per recuperare tutti gli scaffali con il prodotto
+    let totalStock = 0;
+
+    allShelves.forEach(shelf => {
+        const product = shelf.productList.find(p => p.code === productCode);
+        if (product) {
+            totalStock += product.quantity;
+        }
+    });
+
+    const threshold = 10;
+    if (totalStock < threshold) {
+        const socket = getSocket();
+        socket.emit('lowStockAlert', { productCode, totalStock });
+    }
+
+    return updatedShelf;
 })
+
+const getAllShelvesWithProduct = asyncHandler(async (productCode) => {
+    if (!collections?.shelfs) {
+        console.error("Database connection is not established.");
+        return [];
+    }
+
+    try {
+        const shelves = await collections.shelfs.find({
+            "productList.code": productCode
+        }).toArray();
+
+        return shelves;
+    } catch (error) {
+        console.error("Failed to retrieve shelves with product:", error);
+        throw new Error("Failed to retrieve shelves with the specified product.");
+    }
+});
 
 /**
  * Deletes a shelf based on shelf code.
@@ -73,7 +110,7 @@ const updateShelfData = asyncHandler(async(filter, update) => {
  * @returns {Object} The result of the deletion operation.
  */
 const deleteShelf = asyncHandler(async (codShelf) => {
-    return await collections?.shelfs?.deleteOne({_codShelf: codShelf})
+    return await collections?.shelfs?.deleteOne({ _codShelf: codShelf })
 })
 
 module.exports = {
