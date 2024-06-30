@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.1.0](https://github.com/WMS-Corporation/wms-logisticControl-service/compare/v1.0.0...v1.1.0) (2024-06-30)
+
+
+### Features
+
+* Implemented a new route that allowa to delete a product in a shelf ([70a4f44](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/70a4f44923786387290e6262f746fa62472c5f9b))
+* Implemented route that allow to add a new product in a shelf ([5ce48be](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/5ce48beb90f8fe725eb138697409822e5a4690da))
+* Implemented route that return all shelf generated ([72967d7](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/72967d7cf069bc42e523c27f622d101d451aba15))
+* Implemented route to add product in a shelf ([8d65055](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/8d65055d9fd5d69e56c33b313cd392ab64410aa6))
+* **logistic:** completed temperature socketio notification ([9e4b4e2](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/9e4b4e230bf0b990b7b534e1a7426be492ce7127))
+* **logistic:** completed temperature socketio notification, added env range configuration ([c995d83](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/c995d83c2c589633e868b470d728ea967d21ea02))
+* **logistic:** product event on socket-io, first demo version ([005002f](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/005002f08e31d1506e905da397f67b752333f42e))
+* **logistic:** socketio temperature alert example implementation ([df84ae1](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/df84ae1fb3573cb84d03838e1e466ba28245716e))
+* Validate product existence when creating and modifying shelves ([3adbe73](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/3adbe73d60dbd3195b140c29b2a385e03589303e))
+
+
+### Bug Fixes
+
+* **logistic:** product alert simplified ([05b4ca4](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/05b4ca4f5312fb4d5db01f5bd57f849715e523e8))
+* **UI:** variable name shelf corrected ([39494f2](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/39494f20a471f12fc8a714ac5eacd2530370a2c8))
+* Updated method that modified shelf data ([ba03240](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/ba03240b4ef34e5d95bbfeb2f16f8b467707faaa))
+
 ## 1.0.0 (2024-05-03)
 
 
