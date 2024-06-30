@@ -1,7 +1,13 @@
 const {Zone} = require("../../src/entities/zone")
 const {createZone, getZonesByStorageCode, findZoneByCode, updateZoneData, deleteZone} = require("../../src/repositories/zoneRepository");
+const { connectSocket } = require('../../src/utils/socketManager');
+
 const {describe, it, expect} = require('@jest/globals')
 const zoneRepository = () => describe('Zone testing', () => {
+
+    beforeAll(async () => {
+        await connectSocket();
+    });
 
     it("it should create a new zone", async ()  => {
         let corridorCodeList = [ "00140", "00144"]

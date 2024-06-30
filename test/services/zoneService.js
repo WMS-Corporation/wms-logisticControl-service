@@ -1,5 +1,12 @@
 const dotenv = require('dotenv')
 const {generateZone, getAllZones, getZoneByCode, updateZoneByCode, deleteZoneByCode} = require("../../src/services/zoneService");
+
+const { updateZoneData } = require("../../src/repositories/zoneRepository");
+jest.mock("../../src/repositories/zoneRepository", () => ({
+    ...jest.requireActual("../../src/repositories/zoneRepository"),
+    updateZoneData: jest.fn()
+}));
+
 const {describe, beforeEach, it, expect} = require('@jest/globals')
 dotenv.config()
 const mockResponse = () => {
@@ -20,6 +27,7 @@ const zoneService = () => describe('Zone testing', () => {
         req.body = ""
         req.user = ""
         req.params = ""
+        updateZoneData.mockClear();
     })
 
     it('it should return 401 if the body data are invalid', async () => {

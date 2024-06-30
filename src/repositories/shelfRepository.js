@@ -59,19 +59,21 @@ const findShelfByCode = asyncHandler(async (shelfCode) => {
  * @param {Object} update - The update object containing the fields to update and their new values.
  * @returns {Object|null} The updated shelf data if the corridor is found, otherwise null.
  */
-const updateShelfData = asyncHandler(async(filter, update) => {
-    const options = { returnOriginal: false};
+const updateShelfData = asyncHandler(async (filter, update) => {
+    const options = { returnOriginal: false };
     await collections?.shelfs?.findOneAndUpdate(filter, update, options);
-    let updatedShelf =  await collections?.shelfs?.findOne(filter);
+    let updatedShelf = await collections?.shelfs?.findOne(filter);
 
     const threshold = 10;
 
-    updatedShelf._productList.forEach(product => {
-        if (product._stock < threshold) {
-            const socket = getSocket();
-            socket.emit('lowStockAlert', { productCode: product._codProduct, totalStock: product._stock });
-        }
-    });
+    if (updatedShelf && updatedShelf._productList && updatedShelf._productList.length > 0) {
+        updatedShelf._productList.forEach(product => {
+            if (product._stock < threshold) {
+                const socket = getSocket();
+                socket.emit('lowStockAlert', { productCode: product._codProduct, totalStock: product._stock });
+            }
+        });
+    }
 
     return updatedShelf
 })
