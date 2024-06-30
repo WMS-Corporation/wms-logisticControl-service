@@ -1,4 +1,4 @@
-const {collections} = require("../config/dbConnection");
+const { collections } = require("../config/dbConnection");
 const { getSocket } = require('../utils/socketManager');
 
 const asyncHandler = require("express-async-handler");
@@ -36,7 +36,7 @@ const getZones = asyncHandler(async () => {
  * @returns {Array|null} An array containing zone data if retrieval is successful, otherwise null.
  */
 const getZonesByStorageCode = asyncHandler(async (codStorage) => {
-    let storage = await collections?.storage?.findOne({_codStorage:codStorage})
+    let storage = await collections?.storage?.findOne({ _codStorage: codStorage })
     return storage._zoneCodeList
 })
 
@@ -61,24 +61,24 @@ const findZoneByCode = asyncHandler(async (codZone) => {
  * @param {Object} update - The update object containing the fields to update and their new values.
  * @returns {Object|null} The updated zone data if the zone is found, otherwise null.
  */
-const updateZoneData = asyncHandler(async(filter, update) => {
+const updateZoneData = asyncHandler(async (filter, update) => {
     const options = { returnOriginal: false };
     let zone = await collections?.zones?.findOne(filter);
     if (!zone) return null;
 
     await collections?.zones?.findOneAndUpdate(filter, update, options);
-    
+
     zone = await collections?.zones?.findOne(filter);
     if (!zone) return null;
 
-    let validRange = zone._coolingSystemStatus === "Active" ? process.env.TEMPERATURE_REFRIGERATED_VALID_RANGE || "-18;0" : process.env.TEMPERATURE_NOT_REFRIGERATED_VALID_RANGE|| "0;25";
+    let validRange = zone._coolingSystemStatus === "Active" ? process.env.TEMPERATURE_REFRIGERATED_VALID_RANGE || "-18;0" : process.env.TEMPERATURE_NOT_REFRIGERATED_VALID_RANGE || "0;25";
     let [min, max] = validRange.split(';').map(Number);
-            
+
     if (zone._temperature >= max || zone._temperature <= min) {
         const socket = getSocket();
         socket.emit('temperature-alert', { zone: zone._codZone, temperature: zone._temperature });
     }
-    
+
     return zone;
 })
 
@@ -91,7 +91,7 @@ const updateZoneData = asyncHandler(async(filter, update) => {
  * @returns {Object} The result of the deletion operation.
  */
 const deleteZone = asyncHandler(async (codZone) => {
-    return await collections?.zones?.deleteOne({_codZone: codZone})
+    return await collections?.zones?.deleteOne({ _codZone: codZone })
 })
 
 module.exports = {
