@@ -8,7 +8,6 @@ jest.mock("../../src/repositories/zoneRepository", () => ({
     updateZoneData: jest.fn()
 }));
 
-
 dotenv.config()
 const mockResponse = () => {
     const res = {}
