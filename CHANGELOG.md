@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/WMS-Corporation/wms-logisticControl-service/compare/v1.1.0...v1.1.1) (2024-07-01)
+
+
+### Bug Fixes
+
+* Modified methat that update a product in a shelf ([5dbe5a8](https://github.com/WMS-Corporation/wms-logisticControl-service/commit/5dbe5a802048f44756fb457be32bbe8b976f8141))
+
 ## [1.1.0](https://github.com/WMS-Corporation/wms-logisticControl-service/compare/v1.0.0...v1.1.0) (2024-06-30)
 
 
