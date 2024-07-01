@@ -154,12 +154,13 @@ const updateProductInShelf = asyncHandler(async (req, res) => {
         return res.status(404).json({ message: 'Shelf not found.' });
     }
 
-    let index = shelf._productList.indexOf(codProduct);
+    let index = shelf._productList.findIndex(product => product._codProduct === codProduct);
     shelf._productList.splice(index, 1);
     shelf._productList.push({
         _codProduct: codProduct,
         _stock: stock
     });
+    console.log(shelf._productList)
     const filter = { _codShelf: req.params.codShelf };
     const update = { $set: { _productList: shelf._productList } };
 
